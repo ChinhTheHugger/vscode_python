@@ -137,24 +137,26 @@ sheet_obj = wb_obj.active
 
 for x in range(2,sheet_obj.max_row+1):
     if sheet_obj.cell(row = x, column = 2).value == "BIỆN XUÂN KHEN":
-        count = 0
-        for y in range(x+1,x+5000):
-            if sheet_obj.cell(row = y, column = 4).value == sheet_obj.cell(row = x, column = 4).value:
-                count += 1
-        for i in range(x+1,count):
-            if sheet_obj.cell(row = i, column = 2).value != "BIỆN XUÂN KHEN":
-                temp = sheet_obj.cell(row = x, column = 10).value
-                originalArray = temp.split(';')
-                temp = sheet_obj.cell(row = i, column = 10).value
-                houseArray = temp.split(';')
-                houseDuplicate = []
-                for ele in houseArray:
-                    if originalArray.count(ele) > 0:
+        houseDuplicate = []
+        houseList = sheet_obj.cell(row = x, column = 10).value.split(';')
+        for i in range(x,5000):
+            if sheet_obj.cell(row = i, column = 2).value != "BIỆN XUÂN KHEN" and sheet_obj.cell(row = i, column = 4).value == sheet_obj.cell(row = x, column = 4).value:
+                houseCheck = sheet_obj.cell(row = i, column = 10).value.split(';')
+                for ele in houseCheck:
+                    if houseList.count(ele) > 1:
                         houseDuplicate.append(ele)
-                        temp = ';'.join(map(str,list(dict.fromkeys(houseDuplicate))))
-                sheet_obj.cell(row = x, column = 14).value = temp
-                sheet_obj.cell(row = i, column = 3).value = None
-            else:
-                sheet_obj.cell(row = i, column = 3).value = None
-        x = count
+        houseDuplicate = list(dict.fromkeys(houseDuplicate))
+        houseFiltered = ';'.join(map(str,houseDuplicate))
+        sheet_obj.cell(row = x, column = 14).value = houseFiltered
+        sheet_obj.cell(row = i, column = 3).value = None
+# for x in range(2,sheet_obj.max_row+1):
+#     if sheet_obj.cell(row = x, column = 2).value == "BIỆN XUÂN KHEN" and sheet_obj.cell(row = x, column = 14).value != None:
+#         houseDuplicate = []
+#         houseOriginal = sheet_obj.cell(row = x, column = 14).value.split(';')
+#         for ele in houseOriginal:
+#             if houseOriginal.count(ele) > 1:
+#                 houseDuplicate.append(ele)
+#         houseFiltered = ';'.join(map(str,houseDuplicate))
+#         sheet_obj.cell(row = x, column = 15).value = houseFiltered
+#         sheet_obj.cell(row = x, column = 3).value = None
 wb_obj.save(path)
