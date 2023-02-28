@@ -136,27 +136,10 @@ sheet_obj = wb_obj.active
 # * Check houses of each person in a shared phone group and remove unique houses of people with large number of houses to reduce string length
 
 for x in range(2,sheet_obj.max_row+1):
+    waymark = 0
     if sheet_obj.cell(row = x, column = 2).value == "BIỆN XUÂN KHEN":
-        houseDuplicate = []
-        houseList = sheet_obj.cell(row = x, column = 10).value.split(';')
-        for i in range(x,5000):
-            if sheet_obj.cell(row = i, column = 2).value != "BIỆN XUÂN KHEN" and sheet_obj.cell(row = i, column = 4).value == sheet_obj.cell(row = x, column = 4).value:
-                houseCheck = sheet_obj.cell(row = i, column = 10).value.split(';')
-                for ele in houseCheck:
-                    if houseList.count(ele) > 1:
-                        houseDuplicate.append(ele)
-        houseDuplicate = list(dict.fromkeys(houseDuplicate))
-        houseFiltered = ';'.join(map(str,houseDuplicate))
-        sheet_obj.cell(row = x, column = 14).value = houseFiltered
-        sheet_obj.cell(row = i, column = 3).value = None
-# for x in range(2,sheet_obj.max_row+1):
-#     if sheet_obj.cell(row = x, column = 2).value == "BIỆN XUÂN KHEN" and sheet_obj.cell(row = x, column = 14).value != None:
-#         houseDuplicate = []
-#         houseOriginal = sheet_obj.cell(row = x, column = 14).value.split(';')
-#         for ele in houseOriginal:
-#             if houseOriginal.count(ele) > 1:
-#                 houseDuplicate.append(ele)
-#         houseFiltered = ';'.join(map(str,houseDuplicate))
-#         sheet_obj.cell(row = x, column = 15).value = houseFiltered
-#         sheet_obj.cell(row = x, column = 3).value = None
+        waymark = x
+    for i in range(waymark+1,2000):
+        if sheet_obj.cell(row = i, column = 2).value == "BIỆN XUÂN KHEN":
+            sheet_obj.cell(row = i, column = 14).value = "x"    
 wb_obj.save(path)

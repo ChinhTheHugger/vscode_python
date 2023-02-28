@@ -1,7 +1,7 @@
 import openpyxl
 from collections import Counter
 
-path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.02.27 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V17 V4.XLSX"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.02.28 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V17 V4.XLSX"
 
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
