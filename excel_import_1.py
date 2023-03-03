@@ -130,16 +130,5 @@ sheet_obj = wb_obj.active
 #     peopleArrayToSort = list(dict.fromkeys(peopleArrayToSort))
 #     peopleListToStr = '&'.join(map(str,peopleArrayToSort))
 #     sheet_obj.cell(row = x, column = 12).value = peopleListToStr
-
-# ***
-
-# * Check houses of each person in a shared phone group and remove unique houses of people with large number of houses to reduce string length
-
-# for x in range(2,sheet_obj.max_row+1):
-#     waymark = 0
-#     if sheet_obj.cell(row = x, column = 2).value == "BIỆN XUÂN KHEN":
-#         waymark = x
-#     for i in range(waymark+1,2000):
-#         if sheet_obj.cell(row = i, column = 2).value == "BIỆN XUÂN KHEN":
-#             sheet_obj.cell(row = i, column = 14).value = "x"    
+  
 wb_obj.save(path)
