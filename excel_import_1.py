@@ -3,7 +3,7 @@ from difflib import SequenceMatcher
 from collections import OrderedDict
 #import xlsxwriter
 
-path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.01 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V17 V4 - Copy - Copy.XLSX"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.04 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V21 - for processing.XLSX"
 
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
