@@ -1,12 +1,15 @@
 import openpyxl
 from difflib import SequenceMatcher
 from collections import OrderedDict
+import time
 #import xlsxwriter
 
-path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.04 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V21 - for processing.XLSX"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.06 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V21 - for processing.XLSX"
 
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
+
+start = time.time()
 
 # * Select a portion of code and Ctrl+/ to comment the entire selection
 
@@ -47,10 +50,10 @@ sheet_obj = wb_obj.active
 # * Transpose house by phone
 
 # for x in range(2,sheet_obj.max_row+1):
-#    sheet_obj.cell(row = x, column = 9).value = sheet_obj.cell(row = x, column = 7).value
+#    sheet_obj.cell(row = x, column = 8).value = sheet_obj.cell(row = x, column = 7).value
 #    for i in range(x+1,x+5500):
 #        if sheet_obj.cell(row = i, column = 2).value == sheet_obj.cell(row = x, column = 2).value and sheet_obj.cell(row = i, column = 4).value == sheet_obj.cell(row = x, column = 4).value:
-#            sheet_obj.cell(row = x, column = 9).value = sheet_obj.cell(row = x, column = 9).value + ";" + sheet_obj.cell(row = i, column = 7).value
+#            sheet_obj.cell(row = x, column = 8).value = sheet_obj.cell(row = x, column = 8).value + ";" + sheet_obj.cell(row = i, column = 7).value
 #            sheet_obj.cell(row = i, column = 3).value = None
 #            continue
 #        else:
@@ -61,8 +64,8 @@ sheet_obj = wb_obj.active
 
 # * Transpose phone, house group by house
 
-# XlsxWriter: workbook = xlsxwriter.Workbook(path)
-# XlsxWriter: worksheet = workbook.get
+# # XlsxWriter: workbook = xlsxwriter.Workbook(path)
+# # XlsxWriter: worksheet = workbook.get
 # for x in range(2,sheet_obj.max_row+1):
 #    #phone
 #    sheet_obj.cell(row = x, column = 9).number_format = '@' #change data type in cell to string
@@ -90,19 +93,19 @@ sheet_obj = wb_obj.active
 
 # * Remove duplicate and sort
 
-# for x in range(2,sheet_obj.max_row+1):
-#    #phone
-#    phoneString = sheet_obj.cell(row = x, column = 9).value
-#    phoneArrayToSort = phoneString.split(';')
-#    phoneArrayToSort = list(set(phoneArrayToSort))
-#    phoneListToStr = ';'.join(map(str,phoneArrayToSort))
-#    sheet_obj.cell(row = x, column = 9).value = phoneListToStr
-#    #house
-#    houseString = sheet_obj.cell(row = x, column = 10).value
-#    houseArrayToSort = houseString.split(';')
-#    houseArrayToSort = list(set(houseArrayToSort))
-#    houseListToStr = ';'.join(map(str,houseArrayToSort))
-#    sheet_obj.cell(row = x, column = 10).value = houseListToStr
+for x in range(2,sheet_obj.max_row+1):
+   #phone
+   phoneString = sheet_obj.cell(row = x, column = 9).value
+   phoneArrayToSort = phoneString.split(';')
+   phoneArrayToSort = list(set(phoneArrayToSort))
+   phoneListToStr = ';'.join(map(str,phoneArrayToSort))
+   sheet_obj.cell(row = x, column = 9).value = phoneListToStr
+   #house
+   houseString = sheet_obj.cell(row = x, column = 10).value
+   houseArrayToSort = houseString.split(';')
+   houseArrayToSort = list(set(houseArrayToSort))
+   houseListToStr = ';'.join(map(str,houseArrayToSort))
+   sheet_obj.cell(row = x, column = 10).value = houseListToStr
 
 # ***
 
@@ -124,11 +127,15 @@ sheet_obj = wb_obj.active
 
 # * Remove duplicate and sort people
 
-# for x in range(2,sheet_obj.max_row+1):
-#     peopleString = sheet_obj.cell(row = x, column = 12).value
-#     peopleArrayToSort = peopleString.split('&')
-#     peopleArrayToSort = list(dict.fromkeys(peopleArrayToSort))
-#     peopleListToStr = '&'.join(map(str,peopleArrayToSort))
-#     sheet_obj.cell(row = x, column = 12).value = peopleListToStr
-  
+for x in range(2,sheet_obj.max_row+1):
+    peopleString = sheet_obj.cell(row = x, column = 12).value
+    peopleArrayToSort = peopleString.split('&')
+    peopleArrayToSort = list(dict.fromkeys(peopleArrayToSort))
+    peopleListToStr = '&'.join(map(str,peopleArrayToSort))
+    sheet_obj.cell(row = x, column = 12).value = peopleListToStr
+
 wb_obj.save(path)
+
+end = time.time()
+
+print(time.strftime("%H:%M:%S", time.gmtime(end-start)))
