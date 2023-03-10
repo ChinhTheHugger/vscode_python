@@ -73,8 +73,8 @@ def houseGroup(x,i):
     return
 
 arr = [2]
-for x in range(2,130):
-    for i in range(x+1,131):
+for x in range(2,sheet_obj.max_row+1):
+    for i in range(x+1,sheet_obj.max_row+2):
         if sheet_obj.cell(row=i,column=2).value != sheet_obj.cell(row=x,column=2).value:
             break
     if i not in arr:
