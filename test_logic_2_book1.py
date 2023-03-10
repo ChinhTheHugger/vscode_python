@@ -3,8 +3,10 @@
 import openpyxl
 from collections import Counter
 import time
+import numpy
 
-path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\Book1.XLSX"
+pathTest = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\Book1.XLSX"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.10 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V21 - for processing.XLSX"
 
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
@@ -55,35 +57,35 @@ start = time.time()
 #     peopleListToStr = ';'.join(map(str,peopleArrayToSort))
 #     sheet_obj.cell(row = x, column = 5).value = peopleListToStr
 
-def houseGroup(x,i,phoneStr):
-    houseStr = []
-    phoneArr = phoneStr.split(';')
-    for phone in phoneArr:
-        for a in range(x,i-1):
-            if sheet_obj.cell(row=x,column=3).value == phone:
-                houseStr.append(sheet_obj.cell(row=a,column=2).value)
-    houseStr = list(dict.fromkeys(houseStr))
-    houseLst = ';'.join(map(str,houseStr))
-    return houseLst
+def houseGroup(x,i):
+    if i-x==0:
+        sheet_obj.cell(row=x,column=7).value=sheet_obj.cell(row=x,column=6).value
+    else:
+        for a in range(x,i+1):
+            houseArrTemp=[]
+            houseArrTemp.append(sheet_obj.cell(row=a,column=6).value)
+            for b in range(x,i+1):
+                if sheet_obj.cell(row=b,column=3).value==sheet_obj.cell(row=a,column=3).value:
+                    houseArrTemp.append(sheet_obj.cell(row=b,column=6).value)
+            houseArr=list(dict.fromkeys(houseArrTemp))
+            houseStr=';'.join(map(str,houseArr))
+            sheet_obj.cell(row=a,column=7).value=houseStr
+    return
 
-for x in range(2,sheet_obj.max_row+1):
-    count=1
-    for i in range(x+1,sheet_obj.max_row+2):
-        if sheet_obj.cell(row=i,column=1).value == sheet_obj.cell(row=x,column=1).value:
-            count += 1
-        else:
+arr = [2]
+for x in range(2,130):
+    for i in range(x+1,131):
+        if sheet_obj.cell(row=i,column=2).value != sheet_obj.cell(row=x,column=2).value:
             break
-    print(count)
+    if i not in arr:
+        arr.append(i)
     x=i
 
-# sheet_obj.cell(row=2,column=6).value = houseGroup(2,13,sheet_obj.cell(row=2,column=5).value)
-# print(houseGroup(2,13,sheet_obj.cell(row=2,column=5).value))
-# sheet_obj.cell(row=2,column=6).value = houseGroup(13,20,sheet_obj.cell(row=13,column=5).value)
-# print(houseGroup(13,20,sheet_obj.cell(row=2,column=5).value))
-# sheet_obj.cell(row=2,column=6).value = houseGroup(20,26,sheet_obj.cell(row=20,column=5).value)
-# print(houseGroup(20,26,sheet_obj.cell(row=2,column=5).value))
+print(arr)
 
-# print(sheet_obj.max_row)
+newArr = numpy.array(arr)
+for x in range(0,len(arr)-2):
+    houseGroup(newArr[x],newArr[x+1]-1)
 
 wb_obj.save(path)
 
