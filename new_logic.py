@@ -11,7 +11,7 @@ sheet_obj = wb_obj.active
 
 start = time.time()
 
-# * First group *
+# * First step *
 
 # House group
 
@@ -46,7 +46,7 @@ start = time.time()
 # for x in range(0,len(arr)-2):
 #     houseGroup(newArr[x],newArr[x+1]-1)
 
-# Phone group
+# Phone group - this one will be used to group people sharing phone later
 
 # def phoneGroup(x,i):
 #     if i-x==0:
@@ -124,7 +124,7 @@ print(arr)
 print(len(arr))
 
 newArr = numpy.array(arr)
-for x in range(0,len(arr)-2):
+for x in range(0,len(arr)-1):
     houseGroup(newArr[x],newArr[x+1]-1)
 
 # Phone group
@@ -171,9 +171,9 @@ for x in range(0,len(arr)-2):
 # for x in range(0,len(arr)-2):
 #     phoneGroup(newArr[x],newArr[x+1]-1)
 
-# wb_obj.save(path)
 
 
+wb_obj.save(path)
 
 end = time.time()
 
