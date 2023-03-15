@@ -1,31 +1,71 @@
 import openpyxl
-import pandas
+from collections import Counter
 import time
+import numpy
 
-# pathOne = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\test_1 (name match the original V21 on mar 6).CSV"
-# pathTwo = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\test_2 (copied from test_2_original).CSV"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.15 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V22 - for processing V1.XLSX"
 
-# df_one = pandas.read_csv(pathOne,encoding='UTF-8')
-# df_two = pandas.read_csv(pathTwo,encoding='UTF-8')
+wb_obj = openpyxl.load_workbook(path)
+sheet_obj = wb_obj.active
 
-# # df_one.drop(['Phone temp','ghép căn theo từng số điện thoại dựa theo tên','ghép số điện thoại theo từng căn dựa theo tên','ghép danh sách căn ở cột H có liên quan đến từng số điện thoại ở cột I theo từng căn dựa theo tên','ghép cột C và cột J','cột chép version 1'],axis=1,inplace=True)
-# # df_two.drop(['Phone temp','ghép căn theo từng số điện thoại dựa theo tên','ghép số điện thoại theo từng căn dựa theo tên','ghép danh sách căn ở cột H có liên quan đến từng số điện thoại ở cột I theo từng căn dựa theo tên','ghép cột C và cột J','cột chép version 1'],axis=1,inplace=True)
+start = time.time()
 
-# df_compare = df_one.compare(df_two,keep_equal=False)
-# df_compare.to_excel("E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\pandas_dataframe_comparing.xlsx")
+# Sort
 
-# print(df_one.reset_index(drop=True).equals(df_two.reset_index(drop=True)))
+# for x in range(2,sheet_obj.max_row+1):
+#     arr=str(sheet_obj.cell(row=x,column=5).value).split(';')
+#     arr.sort()
+#     newStr=';'.join(map(str,arr))
+#     sheet_obj.cell(row=x,column=6).value=newStr
 
-# ***
+# Count length
 
-wb_comparison = openpyxl.load_workbook("E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\pandas_dataframe_comparing.xlsx")
-sh_comparison = wb_comparison.active
+# for x in range(2,sheet_obj.max_row+1):
+#     sheet_obj.cell(row=x,column=7).value=str(sheet_obj.cell(row=x,column=6).value).count(';')+1
 
-wb_destination = openpyxl.load_workbook("E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\test_2_original - after fixed V1.xlsx")
-sh_destination = wb_destination.active
+# Group name with house list
 
-# print(sh_comparison.cell(row=3,column=1).value)
-# print(sh_comparison.cell(row=4,column=1).value)
+# for x in range(2,sheet_obj.max_row+1):
+#     if sheet_obj.cell(row=x,column=7).value>200:
+#         sheet_obj.cell(row=x,column=8).value=str(sheet_obj.cell(row=x,column=2).value)+";"+str(sheet_obj.cell(row=x,column=7).value)+" căn"
+#     else:
+#         sheet_obj.cell(row=x,column=8).value=str(sheet_obj.cell(row=x,column=2).value)+";"+str(sheet_obj.cell(row=x,column=6).value)
 
-# print(sh_destination.cell(row=4,column=1).value)
-# print(sh_destination.cell(row=4,column=2).value)
+# Group people sharing phone
+
+def pplGroup(x,i):
+    if i-x==0:
+        sheet_obj.cell(row=x,column=9).value=sheet_obj.cell(row=x,column=8).value
+    else:
+        for a in range(x,i+1):
+            pplArr=[]
+            pplArr.append(sheet_obj.cell(row=a,column=8).value)
+            for b in range(x,i+1):
+                if sheet_obj.cell(row=b,column=8).value not in pplArr:
+                    pplArr.append(str(sheet_obj.cell(row=b,column=8).value))
+            sheet_obj.cell(row=a,column=9).value='&'.join(pplArr)
+    return
+
+arr = [2]
+for x in range(2,sheet_obj.max_row+1):
+    for i in range(x+1,sheet_obj.max_row+2):
+        if sheet_obj.cell(row=i,column=3).value != sheet_obj.cell(row=x,column=3).value:
+            break
+    if i not in arr:
+        arr.append(i)
+    x=i
+
+print(arr)
+print(len(arr))
+
+newArr = numpy.array(arr)
+for x in range(0,len(arr)-1):
+    pplGroup(newArr[x],newArr[x+1]-1)
+
+
+
+wb_obj.save(path)
+
+end = time.time()
+
+print(time.strftime("%H:%M:%S", time.gmtime(end-start)))
