@@ -3,8 +3,8 @@ from collections import Counter
 import time
 import numpy
 
-# path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.17 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V22 - processed.XLSX"
-path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.18 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V23 - for processing.XLSX"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.28 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V22 - processed.XLSX"
+# path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.18 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V23 - for processing.XLSX"
 
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
@@ -15,15 +15,15 @@ start = time.time()
 
 # * Count general phone and house
 
-for x in range(2,sheet_obj.max_row+1):
-    # #phone
-    # phoneCount = ""
-    # phoneCount = sheet_obj.cell(row = x, column = 18).value
-    # sheet_obj.cell(row = x, column = 16).value = phoneCount.count(';') + 1
-    #house
-    houseCount = ""
-    houseCount = sheet_obj.cell(row = x, column = 5).value
-    sheet_obj.cell(row = x, column = 15).value = houseCount.count(';')+  1
+# for x in range(2,sheet_obj.max_row+1):
+#     # #phone
+#     phoneCount = ""
+#     phoneCount = sheet_obj.cell(row = x, column = 18).value
+#     sheet_obj.cell(row = x, column = 16).value = phoneCount.count(';') + 1
+#     #house
+#     houseCount = ""
+#     houseCount = sheet_obj.cell(row = x, column = 4).value
+#     sheet_obj.cell(row = x, column = 15).value = houseCount.count(';')+  1
 
 # ***
 
@@ -56,12 +56,12 @@ for x in range(2,sheet_obj.max_row+1):
 
 # * Count total area
 
-# for x in range(2,sheet_obj.max_row+1):
-#     count = 0
-#     for i in range(7,13):
-#         if sheet_obj.cell(row = x, column = i).value > 0:
-#             count += 1
-#     sheet_obj.cell(row = x, column = 14).value = count
+for x in range(2,sheet_obj.max_row+1):
+    count = 0
+    for i in range(7,13):
+        if sheet_obj.cell(row = x, column = i).value > 0:
+            count += 1
+    sheet_obj.cell(row = x, column = 14).value = count
 
 # Sort house
 
