@@ -133,13 +133,12 @@ print(len(arr))
 
 newArr = numpy.array(arr)
 for x in range(0,len(newArr)-2):
-    sheet_obj.cell(row=newArr[x],column=7).value = str(sheet_obj.cell(row=newArr[x],column=5).value)
-    sheet_obj.cell(row=newArr[x],column=8).value = str(sheet_obj.cell(row=newArr[x],column=6).value)
     if newArr[x+1]-newArr[x]==1:
-        continue
+        sheet_obj.cell(row=newArr[x],column=7).value = str(sheet_obj.cell(row=newArr[x],column=5).value)
+        sheet_obj.cell(row=newArr[x],column=8).value = str(sheet_obj.cell(row=newArr[x],column=6).value)
     else:
         for i in range(newArr[x],newArr[x+1]):
-            phRecursion(newArr[x],newArr[x+1]-1,i,str(sheet_obj.cell(row=i,column=7).value),str(sheet_obj.cell(row=i,column=8).value))
+            phRecursion(newArr[x],newArr[x+1]-1,i,str(sheet_obj.cell(row=i,column=5).value),str(sheet_obj.cell(row=i,column=6).value))
 
 
 
