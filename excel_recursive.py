@@ -9,12 +9,14 @@ import numpy
 import sys
 
 pathTest = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\Book.XLSX"
-path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.04.11 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V23 - for processing.XLSX"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.04.13 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V23 - for processing.XLSX"
 
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
 
 start = time.time()
+print("Start time = " + time.strftime("%H:%M:%S", time.gmtime(start)))
+time.sleep(10)
 
 
 
@@ -78,42 +80,60 @@ start = time.time()
 
 sys.setrecursionlimit(4850)
 
-def cleanStr(tmpStr):
-    tmpArr=tmpStr.split(';')
-    tmpArr=list(dict.fromkeys(tmpArr))
-    tmpArr.sort()
-    tmpStrN = ';'.join(tmpArr)
-    return tmpStrN
-
 def phRecursion(startNum,endNum,baseNum,basePhoneStr,baseHouseStr):
     phoneArr = numpy.array(str(sheet_obj.cell(row=endNum,column=5).value).split(';'))
     houseArr = numpy.array(str(sheet_obj.cell(row=endNum,column=6).value).split(';'))
+
     if endNum-startNum==0:
         if str(sheet_obj.cell(row=endNum,column=5).value)==str(sheet_obj.cell(row=baseNum,column=5).value) and str(sheet_obj.cell(row=endNum,column=6).value)==str(sheet_obj.cell(row=baseNum,column=6).value):
+            sheet_obj.cell(row=baseNum,column=8).value = baseHouseStr
+            sheet_obj.cell(row=baseNum,column=7).value = basePhoneStr
             return
         else:
-            if sum([1 for i in range(0,len(phoneArr)-1) if phoneArr[i] in basePhoneStr]) > 0 or sum([1 for i in range(0,len(houseArr)-1) if houseArr[i] in baseHouseStr]) > 0:
-                basePhoneStr = basePhoneStr + ";" + str(sheet_obj.cell(row=endNum,column=5).value)
-                newBasePhoneStr = cleanStr(basePhoneStr)
-                baseHouseStr = baseHouseStr + ";" + str(sheet_obj.cell(row=endNum,column=6).value)
-                newBaseHouseStr = cleanStr(baseHouseStr)
-                sheet_obj.cell(row=baseNum,column=8).value = newBaseHouseStr
-                sheet_obj.cell(row=baseNum,column=7).value = newBasePhoneStr
+            if sum([1 for i in range(0,len(phoneArr)-1) if phoneArr[i] in basePhoneStr]) > 0:
+
+                phoneSet = set(basePhoneStr.split(';'))
+                phoneSet.update(str(sheet_obj.cell(row=endNum,column=5).value).split(';'))
+                houseSet = set(baseHouseStr.split(';'))
+                houseSet.update(str(sheet_obj.cell(row=endNum,column=6).value).split(';'))
+
+                sheet_obj.cell(row=baseNum,column=8).value = ';'.join(sorted(houseSet))
+                sheet_obj.cell(row=baseNum,column=7).value = ';'.join(sorted(phoneSet))
+                return
+            elif sum([1 for i in range(0,len(houseArr)-1) if houseArr[i] in baseHouseStr]) > 0:
+
+                phoneSet = set(basePhoneStr.split(';'))
+                phoneSet.update(str(sheet_obj.cell(row=endNum,column=5).value).split(';'))
+                houseSet = set(baseHouseStr.split(';'))
+                houseSet.update(str(sheet_obj.cell(row=endNum,column=6).value).split(';'))
+
+                sheet_obj.cell(row=baseNum,column=8).value = ';'.join(sorted(houseSet))
+                sheet_obj.cell(row=baseNum,column=7).value = ';'.join(sorted(phoneSet))
                 return
             else:
-                sheet_obj.cell(row=baseNum,column=8).value = cleanStr(baseHouseStr)
-                sheet_obj.cell(row=baseNum,column=7).value = cleanStr(basePhoneStr)
+                sheet_obj.cell(row=baseNum,column=8).value = baseHouseStr
+                sheet_obj.cell(row=baseNum,column=7).value = basePhoneStr
                 return
     else:
         if str(sheet_obj.cell(row=endNum,column=5).value)==str(sheet_obj.cell(row=baseNum,column=5).value) and str(sheet_obj.cell(row=endNum,column=6).value)==str(sheet_obj.cell(row=baseNum,column=6).value):
             return phRecursion(startNum,endNum-1,baseNum,basePhoneStr,baseHouseStr)
         else:
-            if sum([1 for i in range(0,len(phoneArr)-1) if phoneArr[i] in basePhoneStr]) > 0 or sum([1 for i in range(0,len(houseArr)-1) if houseArr[i] in baseHouseStr]) > 0:
-                basePhoneStr = basePhoneStr + ";" + str(sheet_obj.cell(row=endNum,column=5).value)
-                newBasePhoneStr = cleanStr(basePhoneStr)
-                baseHouseStr = baseHouseStr + ";" + str(sheet_obj.cell(row=endNum,column=6).value)
-                newBaseHouseStr = cleanStr(baseHouseStr)
-                return phRecursion(startNum,endNum-1,baseNum,newBasePhoneStr,newBaseHouseStr)
+            if sum([1 for i in range(0,len(phoneArr)-1) if phoneArr[i] in basePhoneStr]) > 0:
+
+                phoneSet = set(basePhoneStr.split(';'))
+                phoneSet.update(str(sheet_obj.cell(row=endNum,column=5).value).split(';'))
+                houseSet = set(baseHouseStr.split(';'))
+                houseSet.update(str(sheet_obj.cell(row=endNum,column=6).value).split(';'))
+
+                return phRecursion(startNum,endNum-1,baseNum,';'.join(sorted(phoneSet)),';'.join(sorted(houseSet)))
+            elif sum([1 for i in range(0,len(houseArr)-1) if houseArr[i] in baseHouseStr]) > 0:
+
+                phoneSet = set(basePhoneStr.split(';'))
+                phoneSet.update(str(sheet_obj.cell(row=endNum,column=5).value).split(';'))
+                houseSet = set(baseHouseStr.split(';'))
+                houseSet.update(str(sheet_obj.cell(row=endNum,column=6).value).split(';'))
+
+                return phRecursion(startNum,endNum-1,baseNum,';'.join(sorted(phoneSet)),';'.join(sorted(houseSet)))
             else:
                 return phRecursion(startNum,endNum-1,baseNum,basePhoneStr,baseHouseStr)
 
@@ -132,7 +152,7 @@ for x in range(2,sheet_obj.max_row+1):
 print(len(arr))
 
 newArr = numpy.array(arr)
-for x in range(0,len(newArr)-2):
+for x in range(0,len(newArr)-1):
     if newArr[x+1]-newArr[x]==1:
         sheet_obj.cell(row=newArr[x],column=7).value = str(sheet_obj.cell(row=newArr[x],column=5).value)
         sheet_obj.cell(row=newArr[x],column=8).value = str(sheet_obj.cell(row=newArr[x],column=6).value)
