@@ -27,17 +27,17 @@ graph.vs['name'] = ['H1','H2','H3','H4','P1','P2','P3','P4']
 
 print(graph)
 
-# for s in graph.components().subgraphs():
-#     print(s.vs['name'])
-#     print(' | '.join(s.vs['name']))
-#     hStr = []
-#     pStr = []
-#     for ele in s.vs['name']:
-#         if "H" in ele:
-#             hStr.append(ele)
-#         if "P" in ele:
-#             pStr.append(ele)
-#     print(';'.join(hStr) + " and " + ';'.join(pStr))
+for s in graph.components().subgraphs():
+    print(s.vs['name'])
+    print(' | '.join(s.vs['name']))
+    hStr = []
+    pStr = []
+    for ele in s.vs['name']:
+        if "H" in ele:
+            hStr.append(ele)
+        if "P" in ele:
+            pStr.append(ele)
+    print(';'.join(hStr) + " and " + ';'.join(pStr))
 
 # n = 12
 # graphTest = igraph.Graph(n)
@@ -45,23 +45,33 @@ print(graph)
 #     graphTest.add_edges([(x,n-1-x)])
 # print(graphTest)
 
-phList = ['H1','H2','H3','H4','P1','P2','P3','P4']
-graphTest = igraph.Graph(n=len(phList))
-graphTest.vs['name'] = phList
-for x in range(2,sh_test.max_row+1):
-    # for idx,val in enumerate(graphTest.vs['name']):
-    #     if sh_test.cell(row=x,column=2).value == val:
-    #         sh_test.cell(row=x,column=4).value = idx
-    #     elif sh_test.cell(row=x,column=3).value == val:
-    #         sh_test.cell(row=x,column=5).value = idx
-    sh_test.cell(row=x,column=4).value = phList.index(sh_test.cell(row=x,column=2).value)
-    sh_test.cell(row=x,column=5).value = phList.index(sh_test.cell(row=x,column=3).value)
-for i in range(2,sh_test.max_row+1):
-    graphTest.add_edges([(sh_test.cell(row=i,column=4).value,sh_test.cell(row=i,column=5).value)])
-print(graphTest)
+# phList = ['H1','H2','H3','H4','P1','P2','P3','P4']
+# graphTest = igraph.Graph(n=len(phList))
+# graphTest.vs['name'] = phList
+# for x in range(2,sh_test.max_row+1):
+#     # for idx,val in enumerate(graphTest.vs['name']):
+#     #     if sh_test.cell(row=x,column=2).value == val:
+#     #         sh_test.cell(row=x,column=4).value = idx
+#     #     elif sh_test.cell(row=x,column=3).value == val:
+#     #         sh_test.cell(row=x,column=5).value = idx
+#     sh_test.cell(row=x,column=4).value = phList.index(sh_test.cell(row=x,column=2).value)
+#     sh_test.cell(row=x,column=5).value = phList.index(sh_test.cell(row=x,column=3).value)
+# for i in range(2,sh_test.max_row+1):
+#     graphTest.add_edges([(sh_test.cell(row=i,column=4).value,sh_test.cell(row=i,column=5).value)])
+# print(graphTest)
+
+# aSet = []
+# aSet.append("this")
+# aSet.append("is")
+# aSet.append("a")
+# aSet.append("set")
+# print(aSet)
+# print(aSet.index("this"))
+# print(sorted(aSet))
 
 wb_test.save(pathTest)
 
 end = time.time()
 
 print("Run time = " + time.strftime("%H:%M:%S", time.gmtime(end-start)))
+print("End time = " + time.strftime("%H:%M:%S", time.gmtime(end)))
