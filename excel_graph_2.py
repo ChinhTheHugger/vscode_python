@@ -10,7 +10,7 @@ import igraph
 import sys
 
 pathTest = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\Book1.XLSX"
-path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.04.17 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V24 - for processing.XLSX"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.04.18 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V24 - for processing.XLSX"
 
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
@@ -43,11 +43,12 @@ def birthdayGraph(startNum,endNum):
     for s in bGraph.components().subgraphs():
         bArr = []
         for ele in s.vs['name']:
-            if ";" not in ele:
+            if "-" not in ele:
                 bArr.append(ele)
         for x in range(startNum,endNum):
             if str(sheet_obj.cell(row=x,column=5).value) in bArr:
                 sheet_obj.cell(row=x,column=8).value = ';'.join(sorted(bArr))
+    return
 
 arr = [2]
 for x in range(2,sheet_obj.max_row+1):
