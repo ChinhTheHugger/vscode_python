@@ -5,10 +5,14 @@ import numpy
 import igraph
 import sys
 
-path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.04.19 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V22 - processed.XLSX"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.04.21 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V24 - for processing - Copy.XLSX"
+pathTmp = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\area measurement.XLSX"
 
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
+
+wb_tmp = openpyxl.load_workbook(pathTmp)
+sheet_tmp = wb_tmp.active
 
 start = time.time()
 print("Start time = " + time.strftime("%H:%M:%S", time.gmtime(start)))
@@ -16,60 +20,36 @@ time.sleep(5)
 
 # ***
 
-sys.setrecursionlimit(4850)
-
 # * Remove duplicate to get list of unique 
 
-def delDup(startNum,endNum):
-    for x in range(startNum,endNum):
-        for i in range(startNum+1   ,endNum):
-            if sheet_obj.cell(row=i,column=3).value != sheet_obj.cell(row=x,column=3).value:
-                continue
-            else:
-                baseStr = str(sheet_obj.cell(row=x,column=3).value) + "&" + str(sheet_obj.cell(row=x,column=4).value) + "&" + str(sheet_obj.cell(row=x,column=15).value) + "&" + str(sheet_obj.cell(row=x,column=16).value)
-                cmpStr = str(sheet_obj.cell(row=i,column=3).value) + "&" + str(sheet_obj.cell(row=i,column=4).value) + "&" + str(sheet_obj.cell(row=i,column=15).value) + "&" + str(sheet_obj.cell(row=i,column=16).value)
-                if cmpStr == baseStr:
-                    sheet_obj.cell(row=i,column=2).value = None
-                else:
-                    continue
-    return
-
-
-arr = [2]
-for x in range(2,sheet_obj.max_row+1):
-    for i in range(x+1,sheet_obj.max_row+2):
-        if sheet_obj.cell(row=i,column=3).value != sheet_obj.cell(row=x,column=3).value:
-            break
-    if i not in arr:
-        arr.append(i)
-    x=i
-
-# print(arr)
-print(len(arr))
-
-newArr = numpy.array(arr)
-for x in range(0,len(newArr)-1):
-    if newArr[x+1]-newArr[x]==1:
-        continue
-    else:
-        for i in range(newArr[x],newArr[x+1]):
-            delDup(newArr[x],newArr[x+1])
-
-# print(wb_obj.sheetnames)
+# for x in range(2,sheet_obj.max_row+1):
+#     for i in range(x+1,x+5000):
+#         if sheet_obj.cell(row=i,column=3).value != sheet_obj.cell(row=x,column=3).value:
+#             break
+#         else:
+#             if sheet_obj.cell(row=i,column=4).value == sheet_obj.cell(row=x,column=4).value:
+#                 sheet_obj.cell(row=i,column=2).value = None
+#             else:
+#                 break
+#     x=i
 
 # ***
 
-# from openpyxl.styles import PatternFill
+# for x in range(2,sheet_obj.max_row+1):
+#     bArr = str(sheet_obj.cell(row=x,column=16).value).split(';')
+#     tmpArr = [ele for ele in bArr if str(ele) != "1"]
+#     sheet_obj.cell(row=x,column=16).value = ';'.join(tmpArr)
 
-# sheet_ori = wb_obj["VRSH Sort 22.12.26 tên+căn"]
-# sheet_des = wb_obj["VRSH Sort 22.12.26 tên+căn 1S"]
+# for x in range(2,sheet_obj.max_row+1):
+#     if sheet_obj.cell(row=x,column=17).value != None:
+#         sheet_obj.cell(row=x,column=18).value = str(sheet_obj.cell(row=x,column=16).value)+";"+str(sheet_obj.cell(row=x,column=17).value)
 
-# fill_cell = PatternFill(patternType='solid',fgColor='FCBA03')
+for x in range(2,sheet_obj.max_row+1):
+    for i in range(2,sheet_tmp.max_row+1):
+        if sheet_tmp.cell(row=i,column=2).value == sheet_obj.cell(row=x,column=3).value:
+            sheet_obj.cell(row=x,column=4).value = sheet_tmp.cell(row=i,column=3).value
 
-# for x in range(2,sheet_des.max_row+1):
-#     for i in range (2,sheet_ori.max_row+1):
-#         if sheet_ori.cell(row=i,column=1).value == sheet_des.cell(row=x,column=1).value:
-#             sheet_des.cell(row=x,column=1).fill = fill_cell
+
 
 wb_obj.save(path)
 
