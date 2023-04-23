@@ -3,13 +3,15 @@ from collections import Counter
 import time
 import numpy
 
-path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.04.17 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V22 - processed.XLSX"
+path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.04.21 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V22 - processed.XLSX"
 # path = "E:\\Pham Thanh Quyet - 23.12.2022\\DSKH 22.12.23\\VRS VRH\\23.03.18 Riverside+ Harmony Full - Tổng hợp khách hàng và căn V23 - for processing.XLSX"
 
 wb_obj = openpyxl.load_workbook(path)
 sheet_obj = wb_obj.active
 
 start = time.time()
+print("Start time = " + time.strftime("%H:%M:%S", time.gmtime(start)))
+time.sleep(5)
 
 # ***
 
@@ -56,12 +58,12 @@ start = time.time()
 
 # * Count total area
 
-for x in range(2,sheet_obj.max_row+1):
-    count = 0
-    for i in range(5,11):
-        if sheet_obj.cell(row = x, column = i).value > 0:
-            count += 1
-    sheet_obj.cell(row = x, column = 12).value = count
+# for x in range(2,sheet_obj.max_row+1):
+#     count = 0
+#     for i in range(5,11):
+#         if sheet_obj.cell(row = x, column = i).value > 0:
+#             count += 1
+#     sheet_obj.cell(row = x, column = 12).value = count
 
 # Sort house
 
@@ -86,3 +88,4 @@ wb_obj.save(path)
 end = time.time()
 
 print(time.strftime("%H:%M:%S", time.gmtime(end-start)))
+print("End time = " + time.strftime("%H:%M:%S", time.gmtime(end)))
