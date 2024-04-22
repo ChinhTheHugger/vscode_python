@@ -34,7 +34,7 @@ start_calculation = time.time()
 start = datetime.now()
 # print("Start time = " + time.strftime("%H:%M:%S", time.gmtime(start)))
 print("Start time = ", start)
-print("Delay: 3 seconds")
+print("Delay: 2 seconds")
 time.sleep(2)
 
 
@@ -142,26 +142,90 @@ time.sleep(2)
 dataHaversine = set(sheet_result.cell(row=i,column=21).value for i in range(2,7702))
 dataGeodesic = set(sheet_result.cell(row=i,column=23).value for i in range(2,7702))
 dataGreatCircle = set(sheet_result.cell(row=i,column=24).value for i in range(2,7702))
-print("Haversine: min = " + str(min(dataHaversine)) + ", max = " + str(max(dataHaversine)))
-print("Geodesic: min = "+ str(min(dataGeodesic)) + ", max = "+ str(max(dataGeodesic)))
-print("Great Circle: min = "+ str(min(dataGreatCircle)) + ", max = "+ str(max(dataGreatCircle)))
+print("Haversine: min = " + str(min(dataHaversine)) + "m, max = " + str(max(dataHaversine)) + "m\n")
+print("Geodesic: min = "+ str(min(dataGeodesic)) + "m, max = "+ str(max(dataGeodesic)) + "m\n")
+print("Great Circle: min = "+ str(min(dataGreatCircle)) + "m, max = "+ str(max(dataGreatCircle)) + "m\n")
 
 
 
-# export data to bar chart
-chartHaversine = BarChart()
-chartHaversine.height = 30
-chartHaversine.width = 50
-chartHaversine.type = "col"
-chartHaversine.style = 10
-chartHaversine.title = "Haversine"
-chartHaversine.y_axis.title = "Count"
-chartHaversine.x_axis.title = "Distances"
+# # export data to bar chart
+# chartHaversine = BarChart()
+# chartHaversine.height = 30
+# chartHaversine.width = 50
+# chartHaversine.type = "col"
+# chartHaversine.style = 10
+# chartHaversine.title = "Haversine"
+# chartHaversine.y_axis.title = "Count"
+# chartHaversine.x_axis.title = "Distances"
 
-values = Reference(sheet_result,min_col=21,min_row=2,max_col=21,max_row=7701)
-chartHaversine.add_data(values)
-sheet_result.add_chart(chartHaversine,"Z2")
-wb_result.save(path_result)
+# values = Reference(sheet_result,min_col=21,min_row=2,max_col=21,max_row=7701)
+# chartHaversine.add_data(values)
+# sheet_result.add_chart(chartHaversine,"Z2")
+# wb_result.save(path_result)
+
+
+
+# value range percentage
+
+# haversine
+sub50_count = 0
+sub100_count = 0
+sub500_count = 0
+sub1000_count = 0
+above1000_count = 0
+for i in range(2,7702):
+    if sheet_result.cell(row=i,column=21).value < 50:
+        sub50_count +=1
+    elif sheet_result.cell(row=i,column=21).value >= 50 and sheet_result.cell(row=i,column=21).value < 100:
+        sub100_count += 1
+    elif sheet_result.cell(row=i,column=21).value >=100 and sheet_result.cell(row=i,column=21).value<500:
+        sub500_count += 1
+    elif sheet_result.cell(row=i,column=21).value >= 500 and sheet_result.cell(row=i,column=21).value < 1000:
+        sub1000_count += 1
+    elif sheet_result.cell(row=i,column=21).value >= 1000:
+        above1000_count += 1
+print("Haversine:\n- 0 to 50m: "+str(100*(float(sub50_count)/float(7700)))+"%\n- 50 to 100m: "+str(100*(float(sub100_count)/float(7700)))+"%\n- 100 to 500m: "+str(100*(float(sub500_count)/float(7700)))+"%\n- 500 to 1000m: "+str(100*(float(sub1000_count)/float(7700)))+"%\n- 1000m and higher: "+str(100*(float(above1000_count)/float(7700)))+"%\n")
+
+# geodesic
+sub50_count = 0
+sub100_count = 0
+sub500_count = 0
+sub1000_count = 0
+above1000_count = 0
+for i in range(2,7702):
+    if sheet_result.cell(row=i,column=23).value < 50:
+        sub50_count +=1
+    elif sheet_result.cell(row=i,column=23).value >= 50 and sheet_result.cell(row=i,column=23).value < 100:
+        sub100_count += 1
+    elif sheet_result.cell(row=i,column=23).value >=100 and sheet_result.cell(row=i,column=23).value<500:
+        sub500_count += 1
+    elif sheet_result.cell(row=i,column=23).value >= 500 and sheet_result.cell(row=i,column=23).value < 1000:
+        sub1000_count += 1
+    elif sheet_result.cell(row=i,column=23).value >= 1000:
+        above1000_count += 1
+print("Geodesic:\n- 0 to 50m: "+str(100*(float(sub50_count)/float(7700)))+"%\n- 50 to 100m: "+str(100*(float(sub100_count)/float(7700)))+"%\n- 100 to 500m: "+str(100*(float(sub500_count)/float(7700)))+"%\n- 500 to 1000m: "+str(100*(float(sub1000_count)/float(7700)))+"%\n- 1000m and higher: "+str(100*(float(above1000_count)/float(7700)))+"%\n")
+
+# great circle
+sub50_count = 0
+sub100_count = 0
+sub500_count = 0
+sub1000_count = 0
+above1000_count = 0
+for i in range(2,7702):
+    if sheet_result.cell(row=i,column=24).value < 50:
+        sub50_count +=1
+    elif sheet_result.cell(row=i,column=24).value >= 50 and sheet_result.cell(row=i,column=24).value < 100:
+        sub100_count += 1
+    elif sheet_result.cell(row=i,column=24).value >=100 and sheet_result.cell(row=i,column=24).value<500:
+        sub500_count += 1
+    elif sheet_result.cell(row=i,column=24).value >= 500 and sheet_result.cell(row=i,column=24).value < 1000:
+        sub1000_count += 1
+    elif sheet_result.cell(row=i,column=24).value >= 1000:
+        above1000_count += 1
+print("Great circle:\n- 0 to 50m: "+str(100*(float(sub50_count)/float(7700)))+"%\n- 50 to 100m: "+str(100*(float(sub100_count)/float(7700)))+"%\n- 100 to 500m: "+str(100*(float(sub500_count)/float(7700)))+"%\n- 500 to 1000m: "+str(100*(float(sub1000_count)/float(7700)))+"%\n- 1000m and higher: "+str(100*(float(above1000_count)/float(7700)))+"%\n")
+
+# NOTES:
+# - all 3 methods have 54.5% of distance values under 50m
 
 
 
