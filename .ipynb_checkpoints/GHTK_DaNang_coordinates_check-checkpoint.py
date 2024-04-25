@@ -257,7 +257,7 @@ for i in range(2,7702):
     else:
         count_o += 1
 print("Correct dcc5 result: "+str(100*(count_o/7700))+"\nNot correct dcc5 resulkt: "+str(100*(count_x/7700)))
-# wb_result.save(path_result)
+wb_result.save(path_result)
 
 
 
