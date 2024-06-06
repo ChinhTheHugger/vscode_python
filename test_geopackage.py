@@ -54,12 +54,19 @@ def load_geodata(file_path):
         print("Unsupported file format.")
         return None
 
+def plot_geodata(gdf, name, zoom_lvl):
+    fig, ax = plt.subplots(figsize=(10, 10))
+    gdf.to_crs(epsg=3857).plot(ax=ax, alpha=0.5, edgecolor='k')
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, zoom=zoom_lvl)
+    plt.title(name)
+    plt.show()
+        
 def main():
     gdf = load_geodata(file_path)
 
     if gdf is not None:
         while True:
-            print(gdf.head())  # in 20 dòng đầu tiên
+            print(gdf.head())  # in 5 dòng đầu tiên
             print("\nTotal rows: " + str(len(gdf)) + "\n")
 
             print("Level 1 list:")
@@ -75,6 +82,12 @@ def main():
                         print(name)
                     print("Total level 2: " + str(len(gdf_lv1['NAME_2'].unique())) + "\n")
                     break
+                
+            plot_geodata(gdf_lv1,name_1,11)
+            cont = input("Do you want to continue to level 2? (y/n): ").strip().lower()
+            if cont != "y":
+                print("Exiting the program...")
+                exit()
 
             while True:
                 name_2 = input("Select a level 2 name: ")
@@ -85,6 +98,12 @@ def main():
                         print(name)
                     print("Total level 3: " + str(len(gdf_lv2['NAME_3'].unique())) + "\n")
                     break
+            
+            plot_geodata(gdf_lv2,name_2,15)
+            cont = input("Do you want to continue to level 3? (y/n): ").strip().lower()
+            if cont != "y":
+                print("Exiting the program...")
+                exit()
 
             while True:
                 name_3 = input("Select a level 3 name: ")
@@ -107,20 +126,20 @@ def main():
                     for coords in all_coordinates:
                         print(coords) # in multipolygon của địa chỉ level 3 bên trên
                         print("\n")
+                    
+                    print("Raw:\n")
+                    print(geometry)
 
                     # Plot the filtered GeoDataFrame with customization
                     if not specific_gdf.empty:
                         # Plot the specific GeoDataFrame over a basemap
-                        fig, ax = plt.subplots(figsize=(10, 10))
-                        specific_gdf.plot(ax=ax, alpha=0.5, edgecolor='k', color='orange')
-                        ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, zoom=12)  # Adjust zoom level if necessary
-                        plt.show()
+                        plot_geodata(specific_gdf,name_3,17)
                     
                     break
             
             redo = input("Do you want to filter another name? (y/n): ").strip().lower()
             if redo != 'y':
-                print("Exiting the program.")
+                print("Exiting the program...")
                 break
     
 if __name__ == "__main__":
