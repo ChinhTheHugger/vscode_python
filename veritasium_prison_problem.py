@@ -2,6 +2,7 @@ import igraph
 import math
 import random
 import numpy
+import matplotlib.pyplot as plt
 
 def is_power_of_ten(num):
     if num < 1:
@@ -37,11 +38,11 @@ def print_box_formation(list,num):
         print("\n")
         
 def set_up_graph(list,num):
-    graph = igraph.Graph(n=num)
+    graph = igraph.Graph(n=num+2)
     arr = numpy.array(list)
     graph.vs['boxes'] = arr
-    for i in range(0,num):
-        graph.add_edges([int(i), int(list[i])])
+    for i in range(1,num):
+        graph.add_edges([(int(i), int(list[i]))])
     return graph
 
 num_of_prisoners = input_number_of_prisoners()
@@ -51,4 +52,20 @@ box_placement = initialize_random_array(num_of_prisoners)
 
 print_box_formation(box_placement,num_of_prisoners)
 
-print(set_up_graph(box_placement,num_of_prisoners))
+graph = set_up_graph(box_placement,num_of_prisoners)
+
+fig, ax = plt.subplots()
+
+visual_style = {}
+visual_style["vertex_size"] = 10
+visual_style["vertex_color"] = "lightblue"
+visual_style["vertex_label"] = graph.vs.indices
+
+visual_style["vertex_label_dist"] = 3
+visual_style["vertex_label_angle"] = 0 
+
+igraph.plot(graph,target=ax,**visual_style)
+plt.show()
+
+for sub_g in graph.components().subgraphs():
+    print(sub_g)
