@@ -84,8 +84,8 @@ def ghtk_gh_api(start,end,type):
 
 
 
-start = (21.200526,105.842638) # lat, long
-end = (21.185161,104.1166) # lat, long
+start = (21.00797,105.83416) # lat, long
+end = (20.96755,105.77099) # lat, long
 
 # GHTK API accepts: car, bike, motorcycle, xteam_motorcycle
 print(ghtk_gh_api(start,end,'car'))
