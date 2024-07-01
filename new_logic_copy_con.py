@@ -14,7 +14,7 @@ sheet_obj = wb_obj.active
 
 start = time.time()
 
-# Contonuation from new_logic_copy.py
+# Continuation from new_logic_copy.py
 
 # New idea
 # Compare string similarity - WRONG

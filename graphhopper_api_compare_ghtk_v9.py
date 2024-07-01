@@ -383,7 +383,27 @@ def to_wgs84(geom):
 doc.add_heading('LineString Analysis', level=1)
 doc_graph.add_heading('LineString Analysis', level=1)
 
-for i in range(2,5):
+sheet.cell(row=1,column=1).value = 'Case'
+
+sheet.cell(row=1,column=2).value = 'Start lat'
+sheet.cell(row=1,column=3).value = 'Start long'
+
+sheet.cell(row=1,column=4).value = 'End lat'
+sheet.cell(row=1,column=5).value = 'End long'
+
+sheet.cell(row=1,column=6).value = 'GG distance'
+sheet.cell(row=1,column=7).value = 'GH car distance'
+sheet.cell(row=1,column=8).value = 'GH bike distance'
+sheet.cell(row=1,column=9).value = 'GH foot distance'
+
+sheet.cell(row=1,column=10).value = 'GH car interpolate'
+sheet.cell(row=1,column=11).value = 'GH bike interpolate'
+sheet.cell(row=1,column=12).value = 'GH foot interpolate'
+sheet.cell(row=1,column=13).value = 'GH car buffer'
+sheet.cell(row=1,column=14).value = 'GH bike buffer'
+sheet.cell(row=1,column=15).value = 'GH foot buffer'
+
+for i in range(2,20):
     print("Case: "+str(sheet_gg.cell(row=i,column=1).value))
     doc.add_heading(f"Case: {str(sheet_gg.cell(row=i,column=1).value)}", level=2)
     doc_graph.add_heading(f"Case: {str(sheet_gg.cell(row=i,column=1).value)}", level=2)
@@ -393,6 +413,12 @@ for i in range(2,5):
     
     doc.add_paragraph(f"Start at: lat = {sheet_gg.cell(row=i,column=3).value}, long = {sheet_gg.cell(row=i,column=2).value}")
     doc.add_paragraph(f"End at: lat = {sheet_gg.cell(row=i,column=5).value}, long = {sheet_gg.cell(row=i,column=4).value}")
+    
+    sheet.cell(row=i,column=1).value = sheet_gg.cell(row=i,column=1).value
+    sheet.cell(row=i,column=2).value = sheet_gg.cell(row=i,column=3).value
+    sheet.cell(row=i,column=3).value = sheet_gg.cell(row=i,column=2).value
+    sheet.cell(row=i,column=4).value = sheet_gg.cell(row=i,column=5).value
+    sheet.cell(row=i,column=5).value = sheet_gg.cell(row=i,column=4).value
     
     num_points = 500  # Number of points to interpolate
     
@@ -419,13 +445,19 @@ for i in range(2,5):
     # Transform the buffer back to EPSG:4326 (resulting coordinates are in longitude, latitude)
     buffer_wgs84 = to_wgs84(buffer_utm)
     
+    gg_converted = [[lon, lat] for lon, lat in google_line.coords]
+    gg_line = Feature(geometry=GeoJSONLineString(gg_converted))
+    gg_length = calculate_distance(gg_line,Unit.kilometers)
+    
+    sheet.cell(row=i,column=6).value = gg_length
+    
     # GraphHopper API accepts: car, bike, foot
-    gh_response_car = ghtk_gh_api(start,end,'car')
-    # time.sleep(20)
-    gh_response_bike = ghtk_gh_api(start,end,'bike')
-    # time.sleep(20)
-    gh_response_foot = ghtk_gh_api(start,end,'motorcycle')
-    # time.sleep(20)
+    gh_response_car = graphhopper_api(start,end,'car')
+    time.sleep(20)
+    gh_response_bike = graphhopper_api(start,end,'bike')
+    time.sleep(20)
+    gh_response_foot = graphhopper_api(start,end,'foot')
+    time.sleep(20)
     
     if gh_response_car['status'] is False:
         gh_line_car = LineString([])
@@ -475,6 +507,9 @@ for i in range(2,5):
         
         if LineString(ls).is_empty:
             doc.add_paragraph(f"{name} didn't return a value: {error}")
+            sheet.cell(row=i,column=6+x).value = 0
+            sheet.cell(row=i,column=9+x).value = 0
+            sheet.cell(row=i,column=12+x).value = 0
         else:
             doc.add_heading('Route Lengths', level=4)
             
@@ -489,6 +524,9 @@ for i in range(2,5):
                 print(f"{name}: {error}")
                 
                 doc.add_paragraph(f"{name} didn't return a value: {error}")
+                sheet.cell(row=i,column=6+x).value = 0
+                sheet.cell(row=i,column=9+x).value = 0
+                sheet.cell(row=i,column=12+x).value = 0
                 
             doc.add_heading('Route Distances', level=4)
             
@@ -510,13 +548,14 @@ for i in range(2,5):
 
                 # Identify significant peaks
                 major_divergences = np.where(min_distances_a_to_b > major_divergence_threshold)[0]
+                major_divergences_percentage = len(major_divergences) * 100 / num_points
                 
                 doc.add_paragraph(f'Maximum distance: {max_distance:.2f} km')
                 doc.add_paragraph(f'Minimum distance: {min_distance:.2f} km')
                 doc.add_paragraph(f'Average distance: {average_distance:.2f} km')
                 
                 if len(major_divergences) > 0:
-                    doc.add_paragraph(f'Percentage of sections of {name} with major divergence from Google line (distance > 15 meters, which is bigger than the width of a 4 lanes road): {len(major_divergences) * 100 / num_points} %')
+                    doc.add_paragraph(f'Percentage of sections of {name} with major divergence from Google line (distance > 15 meters, which is bigger than the width of a 4 lanes road): {major_divergences_percentage:.2f} %')
                 
                 dis_data['LineStrings'][name] = {
                     'interpolated_points': interpolated_a,
@@ -532,8 +571,14 @@ for i in range(2,5):
                 percentage_within_buffer = (intersection_length / ls_length) * 100
 
                 doc.add_paragraph(f"Percentage of the second linestring within the buffer: {percentage_within_buffer:.2f}%")
+                
+                sheet.cell(row=i,column=9+x).value = major_divergences_percentage
+                sheet.cell(row=i,column=12+x).value = percentage_within_buffer
             else:
                 doc.add_paragraph(f"{name} didn't return a value, so distance to Google route can't be calculated")
+                
+                sheet.cell(row=i,column=9+x).value = 0
+                sheet.cell(row=i,column=12+x).value = 0
         
     # Create a figure with 2 subplots
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
@@ -597,8 +642,11 @@ font_size = Pt(12)  # 12 point font size
 for paragraph in doc.paragraphs:
     for run in paragraph.runs:
         run.font.size = font_size
-doc_file = "C:\\Users\\phams\\Downloads\\linestring_analysis_test.docx"
+doc_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.docx"
 doc.save(doc_file)
 
-doc_file_graph = "C:\\Users\\phams\\Downloads\\linestring_analysis_test_graphs.docx"
-doc_graph.save(doc_file_graph)
+# doc_file_graph = "C:\\Users\\phams\\Downloads\\linestring_analysis_test_graphs.docx"
+# doc_graph.save(doc_file_graph)
+
+sheet_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.xlsx"
+spreadsheet.save(sheet_file)
