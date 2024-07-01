@@ -450,7 +450,7 @@ sheet.cell(row=1,column=13).value = 'ORS car buffer'
 sheet.cell(row=1,column=14).value = 'ORS bike buffer'
 sheet.cell(row=1,column=15).value = 'ORS foot buffer'
 
-for i in range(2,20):
+for i in range(2,sheet_gg.max_row+1):
     print("Case: "+str(sheet_gg.cell(row=i,column=1).value))
     doc.add_heading(f"Case: {str(sheet_gg.cell(row=i,column=1).value)}", level=2)
     doc_graph.add_heading(f"Case: {str(sheet_gg.cell(row=i,column=1).value)}", level=2)
