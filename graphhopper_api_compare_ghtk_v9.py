@@ -68,7 +68,7 @@ def graphhopper_api(start,end,type):
     }
 
     payload = {
-    "profile": type,
+    "profile": type, # car, bike, foot
     "points": [
         [
             start[1], start[0]
@@ -110,6 +110,53 @@ def graphhopper_api(start,end,type):
         return data
     else:
         encoded_points = data['paths'][0]['points']
+        decoded_points = polyline.decode(encoded_points)
+        
+        data = {
+            'status': True,
+            'route': [(lon, lat) for lat, lon in decoded_points],
+            'message': "No error"
+        }
+        
+        return data
+    
+def openrouteservice_api(start,end,type):
+    headers = {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+        'Authorization': '5b3ce3597851110001cf624882d0e6ed8c5c4aa28b9c89a1157d53f6',
+    }
+
+    json_data = {
+        'coordinates': [
+            [
+                start[1], start[0]
+            ],
+            [
+                end[1], end[0]
+            ]
+        ],
+    }
+    # type: driving-car, driving-hgv, cycling-regular, cycling-road, cycling-mountain, cycling-electric, foot-walking, foot-hiking, wheelchair
+    response = requests.post(f'https://api.openrouteservice.org/v2/directions/{type}/json', headers=headers, json=json_data)
+
+    # Note: json_data will not be serialized by requests
+    # exactly as it was in the original request.
+    #data = '{"coordinates":[[8.681495,49.41461],[8.687872,49.420318]]}'
+    #response = requests.post('https://api.openrouteservice.org/v2/directions/driving-car/json', headers=headers, data=data)
+    
+    data = response.json()
+    
+    if data.get('routes') is None:
+        data = {
+            'status': False,
+            'route': '',
+            'message': data['error']['message']
+        }
+        
+        return data
+    else:
+        encoded_points = data['routes'][0]['geometry']
         decoded_points = polyline.decode(encoded_points)
         
         data = {
@@ -392,16 +439,16 @@ sheet.cell(row=1,column=4).value = 'End lat'
 sheet.cell(row=1,column=5).value = 'End long'
 
 sheet.cell(row=1,column=6).value = 'GG distance'
-sheet.cell(row=1,column=7).value = 'GH car distance'
-sheet.cell(row=1,column=8).value = 'GH bike distance'
-sheet.cell(row=1,column=9).value = 'GH foot distance'
+sheet.cell(row=1,column=7).value = 'ORS car distance'
+sheet.cell(row=1,column=8).value = 'ORS bike distance'
+sheet.cell(row=1,column=9).value = 'ORS foot distance'
 
-sheet.cell(row=1,column=10).value = 'GH car interpolate'
-sheet.cell(row=1,column=11).value = 'GH bike interpolate'
-sheet.cell(row=1,column=12).value = 'GH foot interpolate'
-sheet.cell(row=1,column=13).value = 'GH car buffer'
-sheet.cell(row=1,column=14).value = 'GH bike buffer'
-sheet.cell(row=1,column=15).value = 'GH foot buffer'
+sheet.cell(row=1,column=10).value = 'ORS car interpolate'
+sheet.cell(row=1,column=11).value = 'ORS bike interpolate'
+sheet.cell(row=1,column=12).value = 'ORS foot interpolate'
+sheet.cell(row=1,column=13).value = 'ORS car buffer'
+sheet.cell(row=1,column=14).value = 'ORS bike buffer'
+sheet.cell(row=1,column=15).value = 'ORS foot buffer'
 
 for i in range(2,20):
     print("Case: "+str(sheet_gg.cell(row=i,column=1).value))
@@ -452,12 +499,12 @@ for i in range(2,20):
     sheet.cell(row=i,column=6).value = gg_length
     
     # GraphHopper API accepts: car, bike, foot
-    gh_response_car = graphhopper_api(start,end,'car')
-    time.sleep(20)
-    gh_response_bike = graphhopper_api(start,end,'bike')
-    time.sleep(20)
-    gh_response_foot = graphhopper_api(start,end,'foot')
-    time.sleep(20)
+    gh_response_car = openrouteservice_api(start,end,'driving-car')
+    # time.sleep(20)
+    gh_response_bike = openrouteservice_api(start,end,'cycling-regular')
+    # time.sleep(20)
+    gh_response_foot = openrouteservice_api(start,end,'foot-walking')
+    # time.sleep(20)
     
     if gh_response_car['status'] is False:
         gh_line_car = LineString([])
@@ -645,8 +692,8 @@ for paragraph in doc.paragraphs:
 doc_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.docx"
 doc.save(doc_file)
 
-# doc_file_graph = "C:\\Users\\phams\\Downloads\\linestring_analysis_test_graphs.docx"
-# doc_graph.save(doc_file_graph)
+doc_file_graph = "C:\\Users\\phams\\Downloads\\linestring_analysis_graphs.docx"
+doc_graph.save(doc_file_graph)
 
 sheet_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.xlsx"
 spreadsheet.save(sheet_file)
