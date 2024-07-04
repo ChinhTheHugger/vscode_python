@@ -240,7 +240,7 @@ def ghtk_gh_api(start,end,type):
             data = {
                 'status': False,
                 'route': '',
-                'message': gh_response[0]['errors'][0]
+                'message': gh_response[0]['errors'][0]['message']
             }
             
             return data
@@ -307,7 +307,7 @@ def ghtk_gh_api_local(start,end,type):
             data = {
                 'status': False,
                 'route': '',
-                'message': gh_response[0]['errors'][0]
+                'message': gh_response[0]['errors'][0]['message']
             }
             
             return data
@@ -443,18 +443,22 @@ sheet.cell(row=1,column=6).value = 'GG distance'
 sheet.cell(row=1,column=7).value = 'GH car distance'
 sheet.cell(row=1,column=8).value = 'GH bike distance'
 sheet.cell(row=1,column=9).value = 'GH motor distance'
+sheet.cell(row=1,column=10).value = 'GH xteam motor distance'
 
-sheet.cell(row=1,column=10).value = 'GG car diff %'
-sheet.cell(row=1,column=11).value = 'GG bike diff %'
-sheet.cell(row=1,column=12).value = 'GG motor diff %'
+sheet.cell(row=1,column=11).value = 'GG - GH car distance diff %'
+sheet.cell(row=1,column=12).value = 'GG - GH bike distance diff %'
+sheet.cell(row=1,column=13).value = 'GG - GH motor distance diff %'
+sheet.cell(row=1,column=14).value = 'GG - GH xteam motor distance diff %'
 
-sheet.cell(row=1,column=13).value = 'GH car interpolate'
-sheet.cell(row=1,column=14).value = 'GH bike interpolate'
-sheet.cell(row=1,column=15).value = 'GH motor interpolate'
+sheet.cell(row=1,column=15).value = 'GH car buffer'
+sheet.cell(row=1,column=16).value = 'GH bike buffer'
+sheet.cell(row=1,column=17).value = 'GH motor buffer'
+sheet.cell(row=1,column=18).value = 'GH xteam motor buffer'
 
-sheet.cell(row=1,column=16).value = 'GH car buffer'
-sheet.cell(row=1,column=17).value = 'GH bike buffer'
-sheet.cell(row=1,column=18).value = 'GH motor buffer'
+sheet.cell(row=1,column=19).value = 'GH car error'
+sheet.cell(row=1,column=20).value = 'GH bike error'
+sheet.cell(row=1,column=21).value = 'GH motor error'
+sheet.cell(row=1,column=22).value = 'GH xteam motor error'
 
 for i in range(2,sheet_gg.max_row+1):
     print("Case: "+str(sheet_gg.cell(row=i,column=1).value))
@@ -511,11 +515,13 @@ for i in range(2,sheet_gg.max_row+1):
     sheet.cell(row=i,column=6).value = gg_length
     
     # GraphHopper API accepts: car, bike, foot
-    gh_response_car = ghtk_gh_api(start,end,'car')
+    gh_response_car = ghtk_gh_api_local(start,end,'car')
     # time.sleep(20)
-    gh_response_bike = ghtk_gh_api(start,end,'bike')
+    gh_response_bike = ghtk_gh_api_local(start,end,'bike')
     # time.sleep(20)
-    gh_response_foot = ghtk_gh_api(start,end,'motorcycle')
+    gh_response_foot = ghtk_gh_api_local(start,end,'motorcycle')
+    # time.sleep(20)
+    gh_response_motor = ghtk_gh_api_local(start,end,'xteam_motorcycle')
     # time.sleep(20)
     
     if gh_response_car['status'] is False:
@@ -538,12 +544,19 @@ for i in range(2,sheet_gg.max_row+1):
     else:
         gh_line_foot = LineString(gh_response_foot['route'])
         error_message_foot = gh_response_foot['message']
+        
+    if gh_response_motor['status'] is False:
+        gh_line_motor = LineString([])
+        error_message_motor = gh_response_motor['message']
+    else:
+        gh_line_motor = LineString(gh_response_motor['route'])
+        error_message_motor = gh_response_motor['message']
     
     ls_data = {
-        'geometry': [google_line,gh_line_car,gh_line_bike,gh_line_foot],
-        'route_name': ['Google','ORS car','ORS bike','ORS foot'],
-        'error_message': ['No error',error_message_car,error_message_bike,error_message_foot],
-        'colors': ['red','blue','green','orange']
+        'geometry': [google_line,gh_line_car,gh_line_bike,gh_line_foot,gh_line_motor],
+        'route_name': ['Google','GH car','GH bike','GH motor','GH xteam motor'],
+        'error_message': ['No error',error_message_car,error_message_bike,error_message_foot,error_message_motor],
+        'colors': ['red','blue','green','orange','brown']
     }
     
     dis_data = {
@@ -551,7 +564,7 @@ for i in range(2,sheet_gg.max_row+1):
         'Reference': {'interpolated_points': interpolated_b}
     }
     
-    dis_color = ['blue','green','orange']
+    dis_color = ['blue','green','orange','brown']
     
     ls_gdf = gpd.GeoDataFrame(data=ls_data, crs="EPSG:4326")
     
@@ -563,13 +576,13 @@ for i in range(2,sheet_gg.max_row+1):
         print(f"{name}: {error}")
         
         doc.add_heading(f'{name} summary:', level=3)
+        sheet.cell(row=i,column=18+x).value = error
         
         if LineString(ls).is_empty:
             doc.add_paragraph(f"{name} didn't return a value: {error}")
             sheet.cell(row=i,column=6+x).value = 0
-            sheet.cell(row=i,column=9+x).value = 0
-            sheet.cell(row=i,column=12+x).value = 0
-            sheet.cell(row=i,column=15+x).value = 0
+            sheet.cell(row=i,column=10+x).value = 0
+            sheet.cell(row=i,column=14+x).value = 0
         else:
             doc.add_heading('Route Lengths', level=4)
             
@@ -580,15 +593,14 @@ for i in range(2,sheet_gg.max_row+1):
                 
                 doc.add_paragraph(f"Length of {name} route: {length:.2f} kilometer")
                 sheet.cell(row=i,column=6+x).value = length
-                sheet.cell(row=i,column=9+x).value = (length - gg_length) * 100 / gg_length
+                sheet.cell(row=i,column=10+x).value = (length - gg_length) * 100 / gg_length
             else:
                 print(f"{name}: {error}")
                 
                 doc.add_paragraph(f"{name} didn't return a value: {error}")
                 sheet.cell(row=i,column=6+x).value = 0
-                sheet.cell(row=i,column=9+x).value = 0
-                sheet.cell(row=i,column=12+x).value = 0
-                sheet.cell(row=i,column=15+x).value = 0
+                sheet.cell(row=i,column=10+x).value = 0
+                sheet.cell(row=i,column=14+x).value = 0
                 
             doc.add_heading('Route Distances', level=4)
             
@@ -634,20 +646,19 @@ for i in range(2,sheet_gg.max_row+1):
 
                 doc.add_paragraph(f"Percentage of the second linestring within the buffer: {percentage_within_buffer}%")
                 
-                sheet.cell(row=i,column=12+x).value = major_divergences_percentage
-                sheet.cell(row=i,column=15+x).value = percentage_within_buffer
+                sheet.cell(row=i,column=14+x).value = percentage_within_buffer
             else:
                 doc.add_paragraph(f"{name} didn't return a value, so distance to Google route can't be calculated")
                 
-                sheet.cell(row=i,column=12+x).value = 0
-                sheet.cell(row=i,column=15+x).value = 0
+                sheet.cell(row=i,column=14+x).value = 0
         
     # Create a figure with 2 subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 10))
 
     # Plot the distance graph on the first subplot
     for name, values in dis_data['LineStrings'].items():
-        ax1.plot(range(num_points), values['distances_to_b'], marker='o', linestyle='-', label=f'{name} to B', color=values['color'], markersize=1, linewidth=1)
+        if name == 'GH motor':
+            ax1.plot(range(num_points), values['distances_to_b'], marker='o', linestyle='-', label=f'{name} to B', color=values['color'], markersize=1, linewidth=1)
 
     ax1.axhline(y=major_divergence_threshold, color='r', linestyle='--', label='Major Divergence Threshold', linewidth=1)
     ax1.set_title('Shortest Distance from Each Point on LineStrings A to LineString B')
@@ -658,8 +669,9 @@ for i in range(2,sheet_gg.max_row+1):
     
     for idx, row in ls_gdf.iterrows():
         # Plot the LineString
-        if not row['geometry'].is_empty:
-            ls_gdf.loc[[idx]].plot(ax=ax2, label=row['route_name'], color=row['colors'], linewidth=1)
+        if row['route_name'] == 'GH motor' or row['route_name'] == 'GH xteam motor' or row['route_name'] == 'Google':
+            if not row['geometry'].is_empty:
+                ls_gdf.loc[[idx]].plot(ax=ax2, label=row['route_name'], color=row['colors'], linewidth=1)
 
     # Customize and show the plot
     ax2.set_title('Route from Point A to Point B')
@@ -704,11 +716,12 @@ font_size = Pt(12)  # 12 point font size
 for paragraph in doc.paragraphs:
     for run in paragraph.runs:
         run.font.size = font_size
-doc_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.docx"
-doc.save(doc_file)
+
+# doc_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.docx"
+# doc.save(doc_file)
 
 doc_file_graph = "C:\\Users\\phams\\Downloads\\linestring_analysis_graphs.docx"
 doc_graph.save(doc_file_graph)
 
-sheet_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.xlsx"
-spreadsheet.save(sheet_file)
+# sheet_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.xlsx"
+# spreadsheet.save(sheet_file)
