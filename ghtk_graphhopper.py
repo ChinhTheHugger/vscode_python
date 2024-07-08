@@ -141,23 +141,25 @@ def ghtk_gh_api(start,end,type):
 
     data = response.json()
     
-    if data.get('gh_responses') is None:
-        return "Error getting response"
-    else:
-        gh_response = data['gh_responses']
-        if gh_response[0].get('paths', None) is None or gh_response[0]['paths'] == []:
-            return gh_response[0]['errors'][0]
-        else:
-            paths_data = gh_response[0]['paths']
-            encoded_points = paths_data[0]['points']
-            decoded_points = polyline.decode(encoded_points)
+    # if data.get('gh_responses') is None:
+    #     return "Error getting response"
+    # else:
+    #     gh_response = data['gh_responses']
+    #     if gh_response[0].get('paths', None) is None or gh_response[0]['paths'] == []:
+    #         return gh_response[0]['errors'][0]
+    #     else:
+    #         paths_data = gh_response[0]['paths']
+    #         encoded_points = paths_data[0]['points']
+    #         decoded_points = polyline.decode(encoded_points)
             
-            return LineString([(lon, lat) for lat, lon in decoded_points])
+    #         return LineString([(lon, lat) for lat, lon in decoded_points])
+    
+    return json.dumps(data,indent=4)
 
 
 
-start = (21.00797,105.83416) # lat, long
-end = (20.96755,105.77099) # lat, long
+start = (22.66774,106.25408) # lat, long
+end = (22.449772,106.1463317) # lat, long
 
 # GHTK API accepts: car, bike, motorcycle, xteam_motorcycle
 print(ghtk_gh_api(start,end,'car'))

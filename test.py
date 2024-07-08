@@ -1,40 +1,39 @@
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import numpy as np
-from matplotlib.patches import Polygon
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import time
 
-# Define a function to create some example polygons
-def create_example_polygons():
-    polygons = [
-        [(1, 1), (1, 4), (4, 4), (4, 1)],
-        [(2, 2), (2, 5), (5, 5), (5, 2)],
-        [(3, 3), (3, 6), (6, 6), (6, 3)]
-    ]
-    return polygons
+# Initialize the WebDriver (Chrome in this example)
+driver = webdriver.Firefox()
 
-# Create a figure and axis
-fig, ax = plt.subplots()
+# Navigate to the search page
+driver.get('https://fcivietnam.com/du-an?q_keys=&q_loai=00000000-0000-0000-0000-000000000000&q_von=00000000-0000-0000-0000-000000000000&q_tinh=27&q_tinhtrang=00000000-0000-0000-0000-000000000000&q_year=0&size=100')
 
-# Set up the axis limits
-ax.set_xlim(0, 7)
-ax.set_ylim(0, 7)
+def save_page_as_html(url, filename):
+    driver.get(url)
+    time.sleep(2)  # Wait for the page to load
+    with open(filename, 'w', encoding='utf-8') as file:
+        file.write(driver.page_source)
 
-# Initialization function
-def init():
-    ax.clear()
-    return []
+def process_search_results():
+    # Loop through search result pages
+    while True:
+        # Find all the items in the current result page
+        items = driver.find_elements(By.CSS_SELECTOR, '.fci-user')  # Adjust selector as needed
 
-# Animation function
-def animate(i):
-    ax.clear()  # Clear the previous polygons
-    polygons = create_example_polygons()
-    current_polygon = polygons[i % len(polygons)]  # Loop through the polygons
-    polygon_patch = Polygon(current_polygon, closed=True, fill=None, edgecolor='r')
-    ax.add_patch(polygon_patch)
-    return [polygon_patch]
+        # Iterate over each item and save the page as HTML
+        for index, item in enumerate(items):
+            item_url = item.get_attribute('href')
+            save_page_as_html(item_url, f'Downloads\\test\\result_{index}.html')
 
-# Create the animation
-ani = animation.FuncAnimation(fig, animate, init_func=init, frames=30, interval=1000, blit=True)
+        # Check if there is a next page and navigate to it
+        try:
+            next_button = driver.find_element(By.CSS_SELECTOR, '.next-page-selector')  # Adjust selector as needed
+            next_button.click()
+            time.sleep(2)  # Wait for the next page to load
+        except:
+            break
 
-# Show the animation
-plt.show()
+process_search_results()
+
+driver.quit()
