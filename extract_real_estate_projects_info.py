@@ -81,13 +81,18 @@ async def get_accessibility_tree(url, idx):
         # Get the page source
         page_source = await page.content()
         
-        source_file_path = f'C:\\Users\\phams\\Downloads\\Bac_Ninh\\page sources\\page_source_{idx}.html'
+        source_file_path = f'C:\\Users\\phams\\Downloads\\Bac_Ninh\\page sources\\page_source_{idx-1}.html'
         
         # Save the page source to an HTML file
         with open(source_file_path, 'w', encoding='utf-8') as f:
             f.write(page_source)
             
-        extract_info(source_file_path,idx)
+        try:
+            extract_info(source_file_path,idx)
+        except FileNotFoundError:
+            print(f"File '{source_file_path}' not found.")
+        except Exception as e:
+            print(f"Error reading file: {e}")
         
         await browser.close()
 
@@ -95,3 +100,6 @@ for i in range(2,sheet.max_row+1):
     url = sheet.cell(row=i,column=2).value
     
     asyncio.get_event_loop().run_until_complete(get_accessibility_tree(url,i))
+
+sheet_file = "C:\\Users\\phams\\Downloads\\bac_ninh_projects_links.xlsx"
+spreadsheet.save(sheet_file)
