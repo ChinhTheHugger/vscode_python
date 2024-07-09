@@ -1,39 +1,33 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-import time
+import asyncio
+from playwright.async_api import async_playwright
+import json
 
-# Initialize the WebDriver (Chrome in this example)
-driver = webdriver.Firefox()
+async def get_accessibility_tree(url):
+    async with async_playwright() as p:
+        browser = await p.firefox.launch_persistent_context(user_data_dir="C:\\Users\\phams\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\bd5r7ma0.default-release - Copy", headless=True)
+        page = await browser.new_page()
+        await page.goto(url)
+        
+        # # Get the accessibility tree
+        # accessibility_snapshot = await page.accessibility.snapshot()
+        
+        # with open('C:\\Users\\phams\\Downloads\\accessibility_tree.json', 'w') as f:
+        #     json.dump(accessibility_snapshot, f, indent=2)
+        
+        # await browser.close()
+        
+        # Get the page source
+        page_source = await page.content()
+        
+        # Save the page source to an HTML file
+        with open('C:\\Users\\phams\\Downloads\\page_source.html', 'w', encoding='utf-8') as f:
+            f.write(page_source)
+        
+        await browser.close()
 
-# Navigate to the search page
-driver.get('https://fcivietnam.com/du-an?q_keys=&q_loai=00000000-0000-0000-0000-000000000000&q_von=00000000-0000-0000-0000-000000000000&q_tinh=27&q_tinhtrang=00000000-0000-0000-0000-000000000000&q_year=0&size=100')
+# URL to open
+url = 'https://fcivietnam.com/du-an/du-an-nha-may/2024/10/du-an-nha-may-cong-ty-tnhh-cong-nghe-jy-viet-nam'
 
-def save_page_as_html(url, filename):
-    driver.get(url)
-    time.sleep(2)  # Wait for the page to load
-    with open(filename, 'w', encoding='utf-8') as file:
-        file.write(driver.page_source)
+# Run the function
+asyncio.get_event_loop().run_until_complete(get_accessibility_tree(url))
 
-def process_search_results():
-    # Loop through search result pages
-    while True:
-        # Find all the items in the current result page
-        items = driver.find_elements(By.CSS_SELECTOR, '.fci-user')  # Adjust selector as needed
-
-        # Iterate over each item and save the page as HTML
-        for index, item in enumerate(items):
-            item_url = item.get_attribute('href')
-            save_page_as_html(item_url, f'Downloads\\test\\result_{index}.html')
-
-        # Check if there is a next page and navigate to it
-        try:
-            next_button = driver.find_element(By.CSS_SELECTOR, '.next-page-selector')  # Adjust selector as needed
-            next_button.click()
-            time.sleep(2)  # Wait for the next page to load
-        except:
-            break
-
-process_search_results()
-
-driver.quit()
