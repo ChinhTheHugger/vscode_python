@@ -8,8 +8,8 @@ from docx import Document
 spreadsheet = openpyxl.load_workbook("C:\\Users\\phams\\Downloads\\Bac_Ninh\\bac_ninh_projects_links.xlsx")
 sheet = spreadsheet.active
 
-def extract_info(page_source_html,idx):
-    with open(page_source_html, 'r', encoding='utf-8') as file:
+def extract_info(idx):
+    with open(f'C:\\Users\\phams\\Downloads\\Bac_Ninh\\page sources\\page_source_{idx-1}.html', 'r', encoding='utf-8') as file:
         html_content = file.read()
 
     # Parse the HTML content
@@ -51,8 +51,9 @@ def extract_info(page_source_html,idx):
         doc = Document()
 
         # Add cleaned texts to the document
-        doc.add_paragraph(cleaned_texts[0])
-        doc.add_paragraph('\n')
+        for text in cleaned_texts:
+            doc.add_paragraph(text)
+            doc.add_paragraph('\n')
 
         # Save the document
         output_file_path = f'C:\\Users\\phams\\Downloads\\Bac_Ninh\\thong tin cac du an\\{checkpoint_text}.docx'
@@ -64,42 +65,40 @@ def extract_info(page_source_html,idx):
     else:
         print("Checkpoint text not found.")
 
-async def get_accessibility_tree(url, idx):
-    async with async_playwright() as p:
-        browser = await p.firefox.launch_persistent_context(user_data_dir="C:\\Users\\phams\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\bd5r7ma0.default-release - Copy", headless=True)
-        page = await browser.new_page()
-        await page.goto(url)
+# async def get_accessibility_tree(url, idx):
+#     async with async_playwright() as p:
+#         browser = await p.firefox.launch_persistent_context(user_data_dir="C:\\Users\\phams\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\bd5r7ma0.default-release - Copy", headless=True)
+#         page = await browser.new_page()
+#         await page.goto(url)
         
-        # # Get the accessibility tree
-        # accessibility_snapshot = await page.accessibility.snapshot()
+#         # # Get the accessibility tree
+#         # accessibility_snapshot = await page.accessibility.snapshot()
         
-        # with open('C:\\Users\\phams\\Downloads\\accessibility_tree.json', 'w') as f:
-        #     json.dump(accessibility_snapshot, f, indent=2)
+#         # with open('C:\\Users\\phams\\Downloads\\accessibility_tree.json', 'w') as f:
+#         #     json.dump(accessibility_snapshot, f, indent=2)
         
-        # await browser.close()
+#         # await browser.close()
         
-        # Get the page source
-        page_source = await page.content()
+#         # Get the page source
+#         page_source = await page.content()
         
-        source_file_path = f'C:\\Users\\phams\\Downloads\\Bac_Ninh\\page sources\\page_source_{idx-1}.html'
+#         source_file_path = f'C:\\Users\\phams\\Downloads\\Bac_Ninh\\page sources\\page_source_{idx-1}.html'
         
-        # Save the page source to an HTML file
-        with open(source_file_path, 'w', encoding='utf-8') as f:
-            f.write(page_source)
+#         # Save the page source to an HTML file
+#         with open(source_file_path, 'w', encoding='utf-8') as f:
+#             f.write(page_source)
             
-        try:
-            extract_info(source_file_path,idx)
-        except FileNotFoundError:
-            print(f"File '{source_file_path}' not found.")
-        except Exception as e:
-            print(f"Error reading file: {e}")
+#         try:
+#             extract_info(source_file_path,idx)
+#         except FileNotFoundError:
+#             print(f"File '{source_file_path}' not found.")
+#         except Exception as e:
+#             print(f"Error reading file: {e}")
         
-        await browser.close()
+#         await browser.close()
 
 for i in range(2,sheet.max_row+1):
-    url = sheet.cell(row=i,column=2).value
-    
-    asyncio.get_event_loop().run_until_complete(get_accessibility_tree(url,i))
+    extract_info(i)
 
-sheet_file = "C:\\Users\\phams\\Downloads\\bac_ninh_projects_links.xlsx"
+sheet_file = "C:\\Users\\phams\\Downloads\\Bac_Ninh\\bac_ninh_projects_links.xlsx"
 spreadsheet.save(sheet_file)

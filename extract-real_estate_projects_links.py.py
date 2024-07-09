@@ -4,10 +4,10 @@ import openpyxl
 # spreadsheet = openpyxl.Workbook()
 # sheet = spreadsheet.active
 
-spreadsheet = openpyxl.load_workbook("C:\\Users\\phams\\Downloads\\bac_ninh_projects_links.xlsx")
+spreadsheet = openpyxl.load_workbook("C:\\Users\\phams\\Downloads\\Hung_Yen\\hung_yen_projects_links.xlsx")
 sheet = spreadsheet.active
 
-file_path = "C:\\Users\\phams\\Downloads\\bac_ninh_page_3.json"
+file_path = "C:\\Users\\phams\\Downloads\\hung_yen_page_2.json"
 
 # Attempt to open the file with 'utf-8' encoding
 try:
@@ -28,11 +28,14 @@ if len(data['children']) != 0:
 
 # print(len(links))
 
-sheet.cell(row=1,column=1).value = 'Links'
+sheet.cell(row=1,column=1).value = 'Page source'
+sheet.cell(row=1,column=2).value = 'Links'
+sheet.cell(row=1,column=3).value = 'Project name'
 
 for x in range(len(links)):
-    sheet.cell(row=x+202,column=1).value = links[x]
+    sheet.cell(row=x+102,column=1).value = x+101
+    sheet.cell(row=x+102,column=2).value = links[x]
     
-sheet_file = "C:\\Users\\phams\\Downloads\\bac_ninh_projects_links.xlsx"
+sheet_file = "C:\\Users\\phams\\Downloads\\Hung_Yen\\hung_yen_projects_links.xlsx"
 spreadsheet.save(sheet_file)
 

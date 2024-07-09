@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import re
 from docx import Document
 
-spreadsheet = openpyxl.load_workbook("C:\\Users\\phams\\Downloads\\Bac_Ninh\\bac_ninh_projects_links.xlsx")
+spreadsheet = openpyxl.load_workbook("C:\\Users\\phams\\Downloads\\Vinh_Phuc\\vinh_phuc_projects_links.xlsx")
 sheet = spreadsheet.active
 
 # def extract_info(page_source_html,idx):
@@ -81,7 +81,7 @@ async def get_accessibility_tree(url, idx):
         # Get the page source
         page_source = await page.content()
         
-        source_file_path = f'C:\\Users\\phams\\Downloads\\Bac_Ninh\\page sources\\page_source_{idx-1}.html'
+        source_file_path = f'C:\\Users\\phams\\Downloads\\Vinh_Phuc\\page sources\\page_source_{idx-1}.html'
         
         # Save the page source to an HTML file
         with open(source_file_path, 'w', encoding='utf-8') as f:
@@ -98,10 +98,10 @@ async def get_accessibility_tree(url, idx):
         
         await browser.close()
 
-for i in range(2,sheet.max_row+1):
+for i in range(50,sheet.max_row+1):
     url = sheet.cell(row=i,column=2).value
     
     asyncio.get_event_loop().run_until_complete(get_accessibility_tree(url,i))
 
-sheet_file = "C:\\Users\\phams\\Downloads\\bac_ninh_projects_links.xlsx"
-spreadsheet.save(sheet_file)
+# sheet_file = "C:\\Users\\phams\\Downloads\\bac_ninh_projects_links.xlsx"
+# spreadsheet.save(sheet_file)
