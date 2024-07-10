@@ -16,7 +16,7 @@ spreadsheet = openpyxl.Workbook()
 sheet = spreadsheet.active
 
 # Haversine distance function - return in kilometer
-def haversine(lon1, lat1, lon2, lat2):
+def haversine_for_points(lon1, lat1, lon2, lat2):
     # Radius of the Earth in km
     R = 6371.0
 
@@ -103,7 +103,7 @@ for i in range(2,sheet_gg.max_row+1):
         sheet.cell(row=i,column=12).value = gg_start_lon - sheet_gg.cell(row=i,column=2).value
         sheet.cell(row=i,column=13).value = gg_start_lat - sheet_gg.cell(row=i,column=3).value
         
-        sheet.cell(row=i,column=16).value = haversine(sheet_gg.cell(row=i,column=2).value,sheet_gg.cell(row=i,column=3).value,gg_start_lon,gg_start_lat) * 1000
+        sheet.cell(row=i,column=16).value = haversine_for_points(sheet_gg.cell(row=i,column=2).value,sheet_gg.cell(row=i,column=3).value,gg_start_lon,gg_start_lat) * 1000
     
     if sheet_gg.cell(row=i,column=4).value == gg_end_lon and sheet_gg.cell(row=i,column=5).value == gg_end_lat:
         sheet.cell(row=i,column=11).value = 1
@@ -118,7 +118,7 @@ for i in range(2,sheet_gg.max_row+1):
         sheet.cell(row=i,column=14).value = gg_end_lon - sheet_gg.cell(row=i,column=4).value
         sheet.cell(row=i,column=15).value = gg_end_lat - sheet_gg.cell(row=i,column=5).value
         
-        sheet.cell(row=i,column=17).value = haversine(sheet_gg.cell(row=i,column=4).value,sheet_gg.cell(row=i,column=5).value,gg_end_lon,gg_end_lat) * 1000
+        sheet.cell(row=i,column=17).value = haversine_for_points(sheet_gg.cell(row=i,column=4).value,sheet_gg.cell(row=i,column=5).value,gg_end_lon,gg_end_lat) * 1000
 
 sheet_file = "C:\\Users\\phams\\Downloads\\check_google_results.xlsx"
 spreadsheet.save(sheet_file)

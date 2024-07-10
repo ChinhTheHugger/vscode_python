@@ -389,15 +389,15 @@ def haversine(lonlat1, lonlat2):
     return R * c
 
 # Haversine distance function - return in kilometer
-def haversine_for_points(lon1, lat1, lon2, lat2):
+def haversine_for_points(point1,point2):
     # Radius of the Earth in km
     R = 6371.0
 
     # Convert decimal degrees to radians
-    lat1 = math.radians(lat1)
-    lon1 = math.radians(lon1)
-    lat2 = math.radians(lat2)
-    lon2 = math.radians(lon2)
+    lat1 = math.radians(point1[1])
+    lon1 = math.radians(point1[0])
+    lat2 = math.radians(point2[1])
+    lon2 = math.radians(point2[0])
 
     # Differences in coordinates
     dlat = lat2 - lat1
@@ -462,38 +462,31 @@ sheet.cell(row=1,column=3).value = 'Start long'
 sheet.cell(row=1,column=4).value = 'End lat'
 sheet.cell(row=1,column=5).value = 'End long'
 
-sheet.cell(row=1,column=6).value = 'GG distance'
+sheet.cell(row=1,column=6).value = 'GG start point distance'
+sheet.cell(row=1,column=7).value = 'GG end point distance'
 
-sheet.cell(row=1,column=7).value = 'GH car distance'
-sheet.cell(row=1,column=8).value = 'GH bike distance'
-sheet.cell(row=1,column=9).value = 'GH motor distance'
-sheet.cell(row=1,column=10).value = 'GH xteam motor distance'
+sheet.cell(row=1,column=8).value = 'GHTK car start point distance'
+sheet.cell(row=1,column=9).value = 'GGHTK car end point distance'
 
-sheet.cell(row=1,column=11).value = 'GG - GH car distance diff %'
-sheet.cell(row=1,column=12).value = 'GG - GH bike distance diff %'
-sheet.cell(row=1,column=13).value = 'GG - GH motor distance diff %'
-sheet.cell(row=1,column=14).value = 'GG - GH xteam motor distance diff %'
+sheet.cell(row=1,column=10).value = 'GHTK bike start point distance'
+sheet.cell(row=1,column=11).value = 'GHTK bike end point distance'
 
-sheet.cell(row=1,column=15).value = 'GH car buffer'
-sheet.cell(row=1,column=16).value = 'GH bike buffer'
-sheet.cell(row=1,column=17).value = 'GH motor buffer'
-sheet.cell(row=1,column=18).value = 'GH xteam motor buffer'
+sheet.cell(row=1,column=12).value = 'GHTK motor start point distance'
+sheet.cell(row=1,column=13).value = 'GHTK motor end point distance'
 
-sheet.cell(row=1,column=19).value = 'GH car error'
-sheet.cell(row=1,column=20).value = 'GH bike error'
-sheet.cell(row=1,column=21).value = 'GH motor error'
-sheet.cell(row=1,column=22).value = 'GH xteam motor error'
+sheet.cell(row=1,column=14).value = 'GHTK xteam motor start point distance'
+sheet.cell(row=1,column=15).value = 'GHTK xteam motor end point distance'
+
+sheet.cell(row=1,column=16).value = 'GH car error'
+sheet.cell(row=1,column=17).value = 'GH bike error'
+sheet.cell(row=1,column=18).value = 'GH motor error'
+sheet.cell(row=1,column=19).value = 'GH xteam motor error'
 
 for i in range(2,sheet_gg.max_row+1):
     print("Case: "+str(sheet_gg.cell(row=i,column=1).value))
-    doc.add_heading(f"Case: {str(sheet_gg.cell(row=i,column=1).value)}", level=2)
-    doc_graph.add_heading(f"Case: {str(sheet_gg.cell(row=i,column=1).value)}", level=2)
 
     start = (sheet_gg.cell(row=i,column=3).value,sheet_gg.cell(row=i,column=2).value) # lat, long
     end = (sheet_gg.cell(row=i,column=5).value,sheet_gg.cell(row=i,column=4).value) # lat, long
-    
-    doc.add_paragraph(f"Start at: lat = {sheet_gg.cell(row=i,column=3).value}, long = {sheet_gg.cell(row=i,column=2).value}")
-    doc.add_paragraph(f"End at: lat = {sheet_gg.cell(row=i,column=5).value}, long = {sheet_gg.cell(row=i,column=4).value}")
     
     sheet.cell(row=i,column=1).value = sheet_gg.cell(row=i,column=1).value
     sheet.cell(row=i,column=2).value = sheet_gg.cell(row=i,column=3).value
@@ -599,11 +592,7 @@ for i in range(2,sheet_gg.max_row+1):
         
         print(f"{name}: {error}")
         
-        doc.add_heading(f'{name} summary:', level=3)
-        sheet.cell(row=i,column=18+x).value = error
-        
         if LineString(ls).is_empty:
-            doc.add_paragraph(f"{name} didn't return a value: {error}")
             sheet.cell(row=i,column=6+x).value = 0
             sheet.cell(row=i,column=10+x).value = 0
             sheet.cell(row=i,column=14+x).value = 0
