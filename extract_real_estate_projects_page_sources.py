@@ -4,104 +4,124 @@ import openpyxl
 from bs4 import BeautifulSoup
 import re
 from docx import Document
+import os
+import time
 
-spreadsheet = openpyxl.load_workbook("C:\\Users\\phams\\Downloads\\Vinh_Phuc\\vinh_phuc_projects_links.xlsx")
-sheet = spreadsheet.active
+json_list = [('phu_tho',1),('ha_giang',1),('cao_bang',1),('bac_kan',1),('tuyen_quang',1),('lao_cai',1),('dien_bien',1)
+             ,('lai_chau',1),('son_la',1),('yen_bai',1),('hoa_binh',1),('thai_binh',2),('ha_nam',2),('nam_dinh',1),('ninh_binh',1),('thanh_hoa',2)
+             ,('nghe_an',1),('ha_tinh',1),('quang_binh',1),('quang_tri',1),('thua_thien_hue',1),('da_nang',1),('quang_nam',1),('quang_ngai',1),('binh_dinh',1)
+             ,('phu_yen',1),('khanh_hoa',1),('ninh_thuan',1),('binh_thuan',1),('kon_tum',1),('gia_lai',1),('dak_lak',1),('dak_nong',1),('lam_dong',1)
+             ,('binh_phuoc',2),('tay_ninh',1),('thai_binh_duong',3),('dong_nai',2),('ba_ria_vung_tau',2),('tp_hcm',2),('long_an',2),('tien_giang',1),('ben_tre',1)
+             ,('tra_vinh',1),('vinh_long',1),('dong_thap',1),('an_giang',1),('kien_giang',1),('can_tho',1),('hau_giang',1),('soc_trang',1),('bac_lieu',1),('ca_mau',1)]
 
-# def extract_info(page_source_html,idx):
-#     with open(page_source_html, 'r', encoding='utf-8') as file:
-#         html_content = file.read()
-
-#     # Parse the HTML content
-#     soup = BeautifulSoup(html_content, 'html.parser')
-
-#     # Extract the checkpoint_text from the <h1> tag within the <article class="detail"> tag
-#     checkpoint_text = None
-#     detail_article = soup.find('article', class_='detail')
-#     if detail_article:
-#         h1_tag = detail_article.find('h1')
-#         if h1_tag:
-#             checkpoint_text = h1_tag.get_text(separator='\n').strip()
-
-#     if checkpoint_text:
-#         # print(f"Checkpoint text found: {checkpoint_text}")
-
-#         # Extract text from <article> and <tbody> tags
-#         article_texts = [tag.get_text(separator='\n') for tag in soup.find_all('article')]
-#         tbody_texts = [tag.get_text(separator='\n') for tag in soup.find_all('tbody')]
-
-#         # Combine the texts
-#         all_texts = article_texts + tbody_texts
-
-#         # Remove duplicates
-#         unique_texts = list(set(all_texts))
-
-#         # Join texts with a single line break and clean up
-#         cleaned_texts = [re.sub(r'\n+', '\n', text).strip() for text in unique_texts]
-
-#         # Remove leading and trailing spaces from each line in the cleaned texts
-#         cleaned_texts = [re.sub(r'^\s+', '', text, flags=re.MULTILINE) for text in cleaned_texts]
-
-#         # Ensure checkpoint_text is the first entry
-#         if checkpoint_text in cleaned_texts:
-#             index = cleaned_texts.index(checkpoint_text)
-#             cleaned_texts = cleaned_texts[index:]
-
-#         # Create a new Document
-#         doc = Document()
-
-#         # Add cleaned texts to the document
-#         doc.add_paragraph(cleaned_texts[0])
-#         doc.add_paragraph('\n')
-
-#         # Save the document
-#         output_file_path = f'C:\\Users\\phams\\Downloads\\Bac_Ninh\\thong tin cac du an\\{checkpoint_text}.docx'
-#         doc.save(output_file_path)
-        
-#         sheet.cell(row=idx,column=3).value = checkpoint_text
-
-#         print(f"Texts extracted, cleaned, and saved successfully to {output_file_path}.")
-#     else:
-#         print("Checkpoint text not found.")
-
-async def get_accessibility_tree(url, idx):
-    async with async_playwright() as p:
-        browser = await p.firefox.launch_persistent_context(user_data_dir="C:\\Users\\phams\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\bd5r7ma0.default-release - Copy", headless=True)
-        page = await browser.new_page()
-        await page.goto(url)
-        
-        # # Get the accessibility tree
-        # accessibility_snapshot = await page.accessibility.snapshot()
-        
-        # with open('C:\\Users\\phams\\Downloads\\accessibility_tree.json', 'w') as f:
-        #     json.dump(accessibility_snapshot, f, indent=2)
-        
-        # await browser.close()
-        
-        # Get the page source
-        page_source = await page.content()
-        
-        source_file_path = f'C:\\Users\\phams\\Downloads\\Vinh_Phuc\\page sources\\page_source_{idx-1}.html'
-        
-        # Save the page source to an HTML file
-        with open(source_file_path, 'w', encoding='utf-8') as f:
-            f.write(page_source)
-            
-        # try:
-        #     extract_info(source_file_path,idx)
-        # except FileNotFoundError:
-        #     print(f"File '{source_file_path}' not found.")
-        # except Exception as e:
-        #     print(f"Error reading file: {e}")
-        
-        print(f'Save page source to {source_file_path}')
-        
-        await browser.close()
-
-for i in range(50,sheet.max_row+1):
-    url = sheet.cell(row=i,column=2).value
+for pair in json_list:
+    name, count = pair[0], pair[1]
     
-    asyncio.get_event_loop().run_until_complete(get_accessibility_tree(url,i))
+    parts = name.split('_')
+    capitalized_parts = [part.capitalize() for part in parts]
+    
+    capitalized_name = '_'.join(capitalized_parts)
+    
+    spreadsheet = openpyxl.load_workbook(f"C:\\Users\\phams\\Downloads\\{capitalized_name}\\{name}_projects_links.xlsx")
+    sheet = spreadsheet.active
 
-# sheet_file = "C:\\Users\\phams\\Downloads\\bac_ninh_projects_links.xlsx"
-# spreadsheet.save(sheet_file)
+    # def extract_info(page_source_html,idx):
+    #     with open(page_source_html, 'r', encoding='utf-8') as file:
+    #         html_content = file.read()
+
+    #     # Parse the HTML content
+    #     soup = BeautifulSoup(html_content, 'html.parser')
+
+    #     # Extract the checkpoint_text from the <h1> tag within the <article class="detail"> tag
+    #     checkpoint_text = None
+    #     detail_article = soup.find('article', class_='detail')
+    #     if detail_article:
+    #         h1_tag = detail_article.find('h1')
+    #         if h1_tag:
+    #             checkpoint_text = h1_tag.get_text(separator='\n').strip()
+
+    #     if checkpoint_text:
+    #         # print(f"Checkpoint text found: {checkpoint_text}")
+
+    #         # Extract text from <article> and <tbody> tags
+    #         article_texts = [tag.get_text(separator='\n') for tag in soup.find_all('article')]
+    #         tbody_texts = [tag.get_text(separator='\n') for tag in soup.find_all('tbody')]
+
+    #         # Combine the texts
+    #         all_texts = article_texts + tbody_texts
+
+    #         # Remove duplicates
+    #         unique_texts = list(set(all_texts))
+
+    #         # Join texts with a single line break and clean up
+    #         cleaned_texts = [re.sub(r'\n+', '\n', text).strip() for text in unique_texts]
+
+    #         # Remove leading and trailing spaces from each line in the cleaned texts
+    #         cleaned_texts = [re.sub(r'^\s+', '', text, flags=re.MULTILINE) for text in cleaned_texts]
+
+    #         # Ensure checkpoint_text is the first entry
+    #         if checkpoint_text in cleaned_texts:
+    #             index = cleaned_texts.index(checkpoint_text)
+    #             cleaned_texts = cleaned_texts[index:]
+
+    #         # Create a new Document
+    #         doc = Document()
+
+    #         # Add cleaned texts to the document
+    #         doc.add_paragraph(cleaned_texts[0])
+    #         doc.add_paragraph('\n')
+
+    #         # Save the document
+    #         output_file_path = f'C:\\Users\\phams\\Downloads\\Bac_Ninh\\thong tin cac du an\\{checkpoint_text}.docx'
+    #         doc.save(output_file_path)
+            
+    #         sheet.cell(row=idx,column=3).value = checkpoint_text
+
+    #         print(f"Texts extracted, cleaned, and saved successfully to {output_file_path}.")
+    #     else:
+    #         print("Checkpoint text not found.")
+
+    async def get_accessibility_tree(url_list):
+        async with async_playwright() as p:
+            browser = await p.firefox.launch_persistent_context(user_data_dir="C:\\Users\\phams\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\bd5r7ma0.default-release - Copy", headless=True)
+            page = await browser.new_page()
+            
+            for idx, url in enumerate(url_list):
+                await page.goto(url)
+                
+                # # Get the accessibility tree
+                # accessibility_snapshot = await page.accessibility.snapshot()
+                
+                # with open('C:\\Users\\phams\\Downloads\\accessibility_tree.json', 'w') as f:
+                #     json.dump(accessibility_snapshot, f, indent=2)
+                
+                # await browser.close()
+                
+                # Get the page source
+                page_source = await page.content()
+                
+                source_file_path = f'C:\\Users\\phams\\Downloads\\{capitalized_name}\\page sources\\page_source_{idx+1}.html'
+                
+                # Save the page source to an HTML file
+                with open(source_file_path, 'w', encoding='utf-8') as f:
+                    f.write(page_source)
+                    
+                # try:
+                #     extract_info(source_file_path,idx)
+                # except FileNotFoundError:
+                #     print(f"File '{source_file_path}' not found.")
+                # except Exception as e:
+                #     print(f"Error reading file: {e}")
+                
+                print(f'{capitalized_name}: saved page_source_{idx+1}')
+                
+            await browser.close()
+
+    url_list = [cell.value for cell in sheet['B'][1:]]
+        
+    asyncio.get_event_loop().run_until_complete(get_accessibility_tree(url_list))
+
+    # sheet_file = "C:\\Users\\phams\\Downloads\\bac_ninh_projects_links.xlsx"
+    # spreadsheet.save(sheet_file)
+    
+    time.sleep(10)

@@ -69,39 +69,42 @@ response = requests.post('https://gmap-api-gw.ghtklab.com/route', cookies=cookie
 #response = requests.post('https://gmap-api-gw.ghtklab.com/route', cookies=cookies, headers=headers, data=data)
 
 data = response.json()
-test = data['gh_responses']
-test = test[0]
-test = test['paths']
-test = test[0]
-test  =test['points']
-test = polyline.decode(test)
 
-line = LineString([(lon, lat) for lat, lon in test])
-print(line)
+print(json.dumps(data,indent=4))
 
-data = {
-    'geometry': [line],
-    'name': ['Route 1']
-}
-gdf = gpd.GeoDataFrame(data=data)
-print(gdf)
+# test = data['gh_responses']
+# test = test[0]
+# test = test['paths']
+# test = test[0]
+# test  =test['points']
+# test = polyline.decode(test)
 
-colors = ['blue']
+# line = LineString([(lon, lat) for lat, lon in test])
+# print(line)
 
-fig, ax = plt.subplots()
-for idx, row in gdf.iterrows():
-    # Plot the LineString
-    if not row['geometry'].is_empty:
-        gdf.loc[[idx]].plot(ax=ax, label=row['name'], color=colors[idx])
+# data = {
+#     'geometry': [line],
+#     'name': ['Route 1']
+# }
+# gdf = gpd.GeoDataFrame(data=data)
+# print(gdf)
 
-# Set a fixed aspect ratio
-ax.set_aspect('equal')
+# colors = ['blue']
 
-# Customize and show the plot
-plt.title('Route from Point A to Point B')
-plt.xlabel('Longitude')
-plt.ylabel('Latitude')
-plt.legend(loc='lower right')
-ctx.add_basemap(ax, crs="EPSG:4326", source=ctx.providers.OpenStreetMap.Mapnik, zoom=11)
-plt.grid(True)
-plt.show()
+# fig, ax = plt.subplots()
+# for idx, row in gdf.iterrows():
+#     # Plot the LineString
+#     if not row['geometry'].is_empty:
+#         gdf.loc[[idx]].plot(ax=ax, label=row['name'], color=colors[idx])
+
+# # Set a fixed aspect ratio
+# ax.set_aspect('equal')
+
+# # Customize and show the plot
+# plt.title('Route from Point A to Point B')
+# plt.xlabel('Longitude')
+# plt.ylabel('Latitude')
+# plt.legend(loc='lower right')
+# ctx.add_basemap(ax, crs="EPSG:4326", source=ctx.providers.OpenStreetMap.Mapnik, zoom=11)
+# plt.grid(True)
+# plt.show()

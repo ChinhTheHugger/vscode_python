@@ -515,13 +515,13 @@ for i in range(2,sheet_gg.max_row+1):
     sheet.cell(row=i,column=6).value = gg_length
     
     # GraphHopper API accepts: car, bike, foot
-    gh_response_car = ghtk_gh_api_local(start,end,'car')
+    gh_response_car = ghtk_gh_api(start,end,'car')
     # time.sleep(20)
-    gh_response_bike = ghtk_gh_api_local(start,end,'bike')
+    gh_response_bike = ghtk_gh_api(start,end,'bike')
     # time.sleep(20)
-    gh_response_foot = ghtk_gh_api_local(start,end,'motorcycle')
+    gh_response_foot = ghtk_gh_api(start,end,'motorcycle')
     # time.sleep(20)
-    gh_response_motor = ghtk_gh_api_local(start,end,'xteam_motorcycle')
+    gh_response_motor = ghtk_gh_api(start,end,'xteam_motorcycle')
     # time.sleep(20)
     
     if gh_response_car['status'] is False:
@@ -678,9 +678,18 @@ for i in range(2,sheet_gg.max_row+1):
     ax2.set_xlabel('Longitude')
     ax2.set_ylabel('Latitude')
     ax2.legend(loc='lower right')
+    
     # Plot the buffer
     x, y = buffer_wgs84.exterior.xy
     ax2.fill(x, y, alpha=0.5, fc='red', ec='none', label='Google route buffer')
+    
+    # Plot the start point and end point
+    x1, y1 = start[1], start[0]
+    x2, y2 = end[1], end[0]
+        
+    ax2.plot(x1, y1, marker='o', markersize=3, color='green')
+    ax2.plot(x2, y2, marker='o', markersize=3, color='green')
+    
     # ctx.add_basemap(ax2, crs="EPSG:4326", source=ctx.providers.OpenStreetMap.Mapnik, zoom=15)
     ax2.grid(True)
 
@@ -723,5 +732,5 @@ for paragraph in doc.paragraphs:
 doc_file_graph = "C:\\Users\\phams\\Downloads\\linestring_analysis_graphs.docx"
 doc_graph.save(doc_file_graph)
 
-# sheet_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.xlsx"
-# spreadsheet.save(sheet_file)
+sheet_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.xlsx"
+spreadsheet.save(sheet_file)
