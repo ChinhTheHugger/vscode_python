@@ -9,6 +9,8 @@ from openpyxl.styles import Alignment
 
 path = 'C:\\Users\\phams\\Downloads\\nghi dinh\\nghi_dinh.xlsx'
 
+today = date.today()
+
 if not os.path.exists(path):
     spreadsheet = openpyxl.Workbook()
     sheet = spreadsheet.active
@@ -33,8 +35,6 @@ async def get_accessibility_tree(url):
         # Get the accessibility tree
         accessibility_snapshot = await page.accessibility.snapshot()
         
-        today = date.today()
-        
         with open(f'C:\\Users\\phams\\Downloads\\nghi dinh\\json\\nghi_dinh_list_{today}.json', 'w') as f:
             json.dump(accessibility_snapshot, f, indent=2)
         
@@ -46,7 +46,7 @@ async def get_accessibility_tree(url):
             sheet.cell(row=rows+1,column=3).value = f'json\\nghi_dinh_list_{today}.json'
             sheet.cell(row=rows+1,column=4).value = f'sheet\\nghi_dinh_list_{today}.xlsx'
         
-        print(f'Decree lists, date: {today}')
+        print(f'Decrees list, date: {today}')
         
         await browser.close()
         
@@ -75,8 +75,8 @@ rows = sheet.max_row
 json_path_last_version = f'C:\\Users\\phams\\Downloads\\nghi dinh\\json\\{sheet.cell(row=rows-1,column=5).value}.json'
 sheet_path_last_version = f'C:\\Users\\phams\\Downloads\\nghi dinh\\sheet\\{sheet.cell(row=rows-1,column=5).value}.xlsx'
 
-json_path = f'C:\\Users\\phams\\Downloads\\nghi dinh\\json\\{sheet.cell(row=rows,column=5).value}.json'
-sheet_path = f'C:\\Users\\phams\\Downloads\\nghi dinh\\sheet\\{sheet.cell(row=rows,column=5).value}.xlsx'
+json_path = f'C:\\Users\\phams\\Downloads\\nghi dinh\\json\\nghi_dinh_list_{today}.json'
+sheet_path = f'C:\\Users\\phams\\Downloads\\nghi dinh\\sheet\\nghi_dinh_list_{today}.xlsx'
 
 # Attempt to open the file with 'utf-8' encoding
 try:
@@ -108,6 +108,8 @@ spreadsheet_last_version = openpyxl.load_workbook(sheet_path_last_version)
 sheet_last_version = spreadsheet_last_version.active
 
 decree_codes = [cell.value for cell in sheet_last_version['B']]
+
+count = 0
 
 if len(data['children']) != 0:
     decrees = data['children'][-2]['children']
@@ -143,9 +145,14 @@ if len(data['children']) != 0:
                 decree_code = sheet_list.cell(row=i+2,column=x+2).value
                 if decree_code not in decree_codes:
                     sheet_list.cell(row=i+2,column=6).value = 'NEW'
+                    count += 1
             if x+2 == 5:
                 sheet_list.cell(row=i+2,column=x+2).alignment = Alignment(wrapText=True)
 
-spreadsheet_list.save(sheet_path)
+sheet.cell(row=rows,column=5).value = f'nghi_dinh_list_{today}'
 
-print(f'Saved new decree list on {date.today()}')
+spreadsheet_list.save(sheet_path)
+spreadsheet.save(path)
+
+print(f'Saved new decree list on {today}')
+print(f'There are {count} new decree(s)')

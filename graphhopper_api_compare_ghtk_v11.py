@@ -40,6 +40,7 @@ from scipy.optimize import fsolve
 import math
 import pyproj
 from functools import partial
+from datetime import date
 
 
 
@@ -57,6 +58,8 @@ spreadsheet = openpyxl.Workbook()
 sheet = spreadsheet.active
 
 img_stream = io.BytesIO()
+
+today = date.today()
 
 
 
@@ -199,10 +202,10 @@ def ghtk_gh_api(start,end,type):
             {
                 'points': [
                     [
-                        start[1],start[0]
+                        start[0],start[1]
                     ],
                     [
-                        end[1],end[0]
+                        end[0],end[1]
                     ],
                 ],
                 'vehicle': type, # car, bike, motorcycle, xteam_motorcycle
@@ -485,8 +488,8 @@ sheet.cell(row=1,column=19).value = 'GH xteam motor error'
 for i in range(2,sheet_gg.max_row+1):
     print("Case: "+str(sheet_gg.cell(row=i,column=1).value))
 
-    start = (sheet_gg.cell(row=i,column=3).value,sheet_gg.cell(row=i,column=2).value) # lat, long
-    end = (sheet_gg.cell(row=i,column=5).value,sheet_gg.cell(row=i,column=4).value) # lat, long
+    start = (sheet_gg.cell(row=i,column=2).value,sheet_gg.cell(row=i,column=3).value) # long, lat
+    end = (sheet_gg.cell(row=i,column=4).value,sheet_gg.cell(row=i,column=5).value) # long, lat
     
     sheet.cell(row=i,column=1).value = sheet_gg.cell(row=i,column=1).value
     sheet.cell(row=i,column=2).value = sheet_gg.cell(row=i,column=3).value
@@ -501,35 +504,14 @@ for i in range(2,sheet_gg.max_row+1):
     google_encoded = str(sheet_gg.cell(row=i,column=6).value)
     google_decoded = polyline.decode(google_encoded)
     google_line = LineString(google_decoded)
+    
     google_line = LineString([[lon, lat] for lat, lon in google_line.coords])
     
-    gg_start_lon, gg_start_lat = google_line.coords[0]
-    gg_start_lon, gg_start_lat = round(gg_start_lon, 3), round(gg_start_lat, 3)
+    gg_start = google_line.coords[0]
+    gg_end = google_line.coords[-1]
     
-    gg_end_lon, gg_end_lat = google_line.coords[-1]
-    gg_end_lon, gg_end_lat = round(gg_end_lon, 3), round(gg_end_lat, 3)
-    
-    interpolated_b = interpolate_points(google_line, num_points)
-    
-    # Thresholds in kilometers
-    major_divergence_threshold = 0.015 # kilometers
-    
-    earth_radius_km = 6370
-    
-    # Transform the linestring to UTM
-    linestring_utm = to_utm(google_line)
-    
-    # Create the buffer in UTM coordinates
-    buffer_utm = linestring_utm.buffer(major_divergence_threshold * 1000)
-
-    # Transform the buffer back to EPSG:4326 (resulting coordinates are in longitude, latitude)
-    buffer_wgs84 = to_wgs84(buffer_utm)
-    
-    gg_converted = [[lon, lat] for lon, lat in google_line.coords]
-    gg_line = Feature(geometry=GeoJSONLineString(gg_converted))
-    gg_length = calculate_distance(gg_line,Unit.kilometers)
-    
-    sheet.cell(row=i,column=6).value = gg_length
+    sheet.cell(row=i,column=6).value = haversine_for_points(start,gg_start) * 1000
+    sheet.cell(row=i,column=7).value = haversine_for_points(end,gg_end) * 1000
     
     # GraphHopper API accepts: car, bike, foot
     gh_response_car = ghtk_gh_api(start,end,'car')
@@ -569,179 +551,20 @@ for i in range(2,sheet_gg.max_row+1):
         gh_line_motor = LineString(gh_response_motor['route'])
         error_message_motor = gh_response_motor['message']
     
-    ls_data = {
-        'geometry': [google_line,gh_line_car,gh_line_bike,gh_line_foot,gh_line_motor],
-        'route_name': ['Google','GH car','GH bike','GH motor','GH xteam motor'],
-        'error_message': ['No error',error_message_car,error_message_bike,error_message_foot,error_message_motor],
-        'colors': ['red','blue','green','orange','brown']
-    }
+    geometry = [gh_line_car,gh_line_bike,gh_line_foot,gh_line_motor]
+    error = [error_message_car,error_message_bike,error_message_foot,error_message_motor]
     
-    dis_data = {
-        'LineStrings': {},
-        'Reference': {'interpolated_points': interpolated_b}
-    }
-    
-    dis_color = ['blue','green','orange','brown']
-    
-    ls_gdf = gpd.GeoDataFrame(data=ls_data, crs="EPSG:4326")
-    
-    for x in range(1,len(ls_gdf)):
-        ls = ls_gdf.iloc[x].geometry
-        name = ls_gdf.iloc[x].route_name
-        error = ls_gdf.iloc[x].error_message
-        
-        print(f"{name}: {error}")
-        
-        if LineString(ls).is_empty:
-            sheet.cell(row=i,column=6+x).value = 0
-            sheet.cell(row=i,column=10+x).value = 0
-            sheet.cell(row=i,column=14+x).value = 0
+    for x in range(len(geometry)):
+        if LineString(geometry[x]).is_empty:
+            sheet.cell(row=i,column=16+x).value = error[x]
         else:
-            doc.add_heading('Route Lengths', level=4)
+            sheet.cell(row=i,column=16+x).value = error[x]
             
-            if not LineString(ls).is_empty:
-                ls_converted = convert_to_lon_lat(ls)
-                line = Feature(geometry=GeoJSONLineString(ls_converted))
-                length = calculate_distance(line,Unit.kilometers)
-                
-                doc.add_paragraph(f"Length of {name} route: {length:.2f} kilometer")
-                sheet.cell(row=i,column=6+x).value = length
-                sheet.cell(row=i,column=10+x).value = (length - gg_length) * 100 / gg_length
-            else:
-                print(f"{name}: {error}")
-                
-                doc.add_paragraph(f"{name} didn't return a value: {error}")
-                sheet.cell(row=i,column=6+x).value = 0
-                sheet.cell(row=i,column=10+x).value = 0
-                sheet.cell(row=i,column=14+x).value = 0
-                
-            doc.add_heading('Route Distances', level=4)
+            gh_start = geometry[x].coords[0]
+            gh_end = geometry[x].coords[-1]
             
-            if not LineString(ls).is_empty:
-                # Interpolate additional points along each LineString
-                
-                interpolated_a = interpolate_points(ls, num_points)
-                
-                # Calculate pairwise haversine distances for interpolated points
-                distances_ab = haversine(interpolated_a, interpolated_b)
+            sheet.cell(row=i,column=8+(2*x)).value = haversine_for_points(start,gh_start) * 1000
+            sheet.cell(row=i,column=9+(2*x)).value = haversine_for_points(end,gh_end) * 1000
 
-                # Find the minimum distance for each point in interpolated_a to any point in interpolated_b
-                min_distances_a_to_b = distances_ab.min(axis=1)
-
-                # Calculate key statistics
-                max_distance = np.max(min_distances_a_to_b)
-                min_distance = np.min(min_distances_a_to_b)
-                average_distance = np.mean(min_distances_a_to_b)
-
-                # Identify significant peaks
-                major_divergences = np.where(min_distances_a_to_b <= major_divergence_threshold)[0]
-                major_divergences_percentage = len(major_divergences) * 100 / num_points
-                
-                doc.add_paragraph(f'Maximum distance: {max_distance:.2f} km')
-                doc.add_paragraph(f'Minimum distance: {min_distance:.2f} km')
-                doc.add_paragraph(f'Average distance: {average_distance:.2f} km')
-                
-                if len(major_divergences) > 0:
-                    doc.add_paragraph(f'Percentage of sections of {name} with minor divergence from Google line (distance <= 15 meters, which is roughly the width of a 4 lanes road): {major_divergences_percentage} %')
-                
-                dis_data['LineStrings'][name] = {
-                    'interpolated_points': interpolated_a,
-                    'distances_to_b': min_distances_a_to_b,
-                    'color': dis_color[x-1]
-                }
-                
-                intersection = ls.intersection(buffer_wgs84)
-                intersection_length = intersection.length
-                
-                ls_length = ls.length
-                
-                percentage_within_buffer = (intersection_length / ls_length) * 100
-
-                doc.add_paragraph(f"Percentage of the second linestring within the buffer: {percentage_within_buffer}%")
-                
-                sheet.cell(row=i,column=14+x).value = percentage_within_buffer
-            else:
-                doc.add_paragraph(f"{name} didn't return a value, so distance to Google route can't be calculated")
-                
-                sheet.cell(row=i,column=14+x).value = 0
-        
-    # Create a figure with 2 subplots
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 10))
-
-    # Plot the distance graph on the first subplot
-    for name, values in dis_data['LineStrings'].items():
-        ax1.plot(range(num_points), values['distances_to_b'], marker='o', linestyle='-', label=f'{name} to B', color=values['color'], markersize=1, linewidth=1)
-
-    ax1.axhline(y=major_divergence_threshold, color='r', linestyle='--', label='Major Divergence Threshold', linewidth=1)
-    ax1.set_title('Shortest Distance from Each Point on LineStrings A to LineString B')
-    ax1.set_xlabel('Index of Point on LineString A')
-    ax1.set_ylabel('Minimum Distance to LineString B (km)')
-    ax1.legend()
-    ax1.grid(True)
-    
-    for idx, row in ls_gdf.iterrows():
-        # Plot the LineString
-        if not row['geometry'].is_empty:
-            ls_gdf.loc[[idx]].plot(ax=ax2, label=row['route_name'], color=row['colors'], linewidth=1)
-
-    # Customize and show the plot
-    ax2.set_title('Route from Point A to Point B')
-    ax2.set_xlabel('Longitude')
-    ax2.set_ylabel('Latitude')
-    ax2.legend(loc='lower right')
-    
-    # Plot the buffer
-    x, y = buffer_wgs84.exterior.xy
-    ax2.fill(x, y, alpha=0.5, fc='red', ec='none', label='Google route buffer')
-    
-    # Plot the start point and end point
-    x1, y1 = start[1], start[0]
-    x2, y2 = end[1], end[0]
-        
-    ax2.plot(x1, y1, marker='o', markersize=3, color='green')
-    ax2.plot(x2, y2, marker='o', markersize=3, color='green')
-    
-    # ctx.add_basemap(ax2, crs="EPSG:4326", source=ctx.providers.OpenStreetMap.Mapnik, zoom=15)
-    ax2.grid(True)
-
-    # manager = plt.get_current_fig_manager()
-    # manager.window.state('zoomed')
-
-    # Adjust layout
-    plt.tight_layout()
-    # plt.show()
-
-    plt.savefig(img_stream, format='png')
-    # Save the plot to a file
-    plot_file = "C:\\Users\\phams\\Downloads\\linestrings_plot.png"
-    fig.savefig(plot_file)
-    plt.close(fig)  # Close the plot
-
-    # Check if the file is created and valid
-    # try:
-    #     with Image.open(plot_file) as img:
-    #         img.show()  # Open the image to verify
-    # except IOError:
-    #     print("Error: The image was not saved correctly.")
-
-    doc.add_heading('Plot of routes and distances', level=2)
-    doc.add_picture(plot_file, width=Inches(5))
-    doc_graph.add_picture(plot_file, width=Inches(5))
-    
-    # doc.add_page_break()
-    
-# Define the desired font size
-font_size = Pt(12)  # 12 point font size
-# Set the font size for all paragraphs and runs in the document
-for paragraph in doc.paragraphs:
-    for run in paragraph.runs:
-        run.font.size = font_size
-
-# doc_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.docx"
-# doc.save(doc_file)
-
-doc_file_graph = "C:\\Users\\phams\\Downloads\\linestring_analysis_graphs.docx"
-doc_graph.save(doc_file_graph)
-
-sheet_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.xlsx"
+sheet_file = f"C:\\Users\\phams\\Downloads\\linestring_analysis_start_end_{today}.xlsx"
 spreadsheet.save(sheet_file)

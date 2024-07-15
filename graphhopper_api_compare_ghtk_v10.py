@@ -40,6 +40,7 @@ from scipy.optimize import fsolve
 import math
 import pyproj
 from functools import partial
+from datetime import date
 
 
 
@@ -57,6 +58,8 @@ spreadsheet = openpyxl.Workbook()
 sheet = spreadsheet.active
 
 img_stream = io.BytesIO()
+
+today = date.today()
 
 
 
@@ -449,6 +452,31 @@ def to_utm(geom):
 def to_wgs84(geom):
     return transform(transformer_to_wgs84.transform, geom)
 
+# Function to calculate data density in a corner
+def corner_density(ax, corner, linestrings, buffer=0.1):
+    xlim, ylim = ax.get_xlim(), ax.get_ylim()
+    xbuffer, ybuffer = buffer * (xlim[1] - xlim[0]), buffer * (ylim[1] - ylim[0])
+    if corner == 'upper right':
+        x_range = (xlim[1] - xbuffer, xlim[1])
+        y_range = (ylim[1] - ybuffer, ylim[1])
+    elif corner == 'upper left':
+        x_range = (xlim[0], xlim[0] + xbuffer)
+        y_range = (ylim[1] - ybuffer, ylim[1])
+    elif corner == 'lower right':
+        x_range = (xlim[1] - xbuffer, xlim[1])
+        y_range = (ylim[0], ylim[0] + ybuffer)
+    elif corner == 'lower left':
+        x_range = (xlim[0], xlim[0] + xbuffer)
+        y_range = (ylim[0], ylim[0] + ybuffer)
+    
+    density = 0
+    for linestring in linestrings:
+        x, y = linestring.xy
+        points_in_corner = np.sum((x_range[0] <= x) & (x <= x_range[1]) & (y_range[0] <= y) & (y <= y_range[1]))
+        density += points_in_corner
+    
+    return density
+
 
 
 doc.add_heading('LineString Analysis', level=1)
@@ -699,7 +727,12 @@ for i in range(2,sheet_gg.max_row+1):
     ax2.set_title('Route from Point A to Point B')
     ax2.set_xlabel('Longitude')
     ax2.set_ylabel('Latitude')
-    ax2.legend(loc='lower right')
+    
+    corners = ['upper right', 'upper left', 'lower right', 'lower left']
+    densities = {corner: corner_density(ax2, corner, ls_data['geometry']) for corner in corners}
+    best_corner = min(densities, key=densities.get)
+    
+    ax2.legend()
     
     # Plot the buffer
     x, y = buffer_wgs84.exterior.xy
@@ -748,11 +781,11 @@ for paragraph in doc.paragraphs:
     for run in paragraph.runs:
         run.font.size = font_size
 
-# doc_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.docx"
+# doc_file = f"C:\\Users\\phams\\Downloads\\linestring_analysis_{today}.docx"
 # doc.save(doc_file)
 
-doc_file_graph = "C:\\Users\\phams\\Downloads\\linestring_analysis_graphs.docx"
+doc_file_graph = f"C:\\Users\\phams\\Downloads\\linestring_analysis_graphs_{today}.docx"
 doc_graph.save(doc_file_graph)
 
-sheet_file = "C:\\Users\\phams\\Downloads\\linestring_analysis.xlsx"
+sheet_file = f"C:\\Users\\phams\\Downloads\\linestring_analysis_{today}.xlsx"
 spreadsheet.save(sheet_file)
