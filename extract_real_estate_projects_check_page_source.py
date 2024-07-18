@@ -8,7 +8,7 @@ import os
 import time
 import pickle
 
-with open("C:\\Users\\phams\\Downloads\\du an\\du lieu goc\\Bac_Ninh\\page sources\\page_source_204.html", 'r', encoding='utf-8') as file:
+with open("C:\\Users\\phams\\Downloads\\du an\\du lieu goc\\Bac_Ninh\\page sources\\page_source_10.html", 'r', encoding='utf-8') as file:
     html_content = file.read()
 
 soup = BeautifulSoup(html_content, 'html.parser')

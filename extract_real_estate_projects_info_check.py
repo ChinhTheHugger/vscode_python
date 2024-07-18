@@ -55,23 +55,25 @@ for idx, obj in enumerate(provinces):
         article_str = ''
         for tag in soup.find_all('article'):
             string = str(tag.get_text(separator='\n').strip())
-            arr = string.split('\n')
-            filtered_list = [item.strip() for item in arr if item != '' and item != '\xa0' and item != ' ' and item.strip() != ':'and item.strip() != '']
+            # arr = string.split('\n')
+            # filtered_list = [item.strip() for item in arr if item != '' and item != '\xa0' and item != ' ' and item.strip() != ':'and item.strip() != '']
             # print(filtered_list)
             # print(len(filtered_list))
-            article_str = '&'.join(filtered_list)
-            sheet_check.cell(row=i,column=5).value = article_str
+            # article_str = '&'.join(filtered_list)
+            # sheet_check.cell(row=i,column=5).value = article_str
+            sheet_check.cell(row=i,column=5).value = string
             # print('---------------------------------------------------------------------------')
 
         tbody_str  =''
         for tag in soup.find_all('tbody'):
             string = str(tag.get_text(separator='\n').strip())
-            arr = string.split('\n')
-            filtered_list = [item.strip() for item in arr if item != '' and item != '\xa0' and item != ' ' and item.strip() != ':']
+            # arr = string.split('\n')
+            # filtered_list = [item.strip() for item in arr if item != '' and item != '\xa0' and item != ' ' and item.strip() != ':']
             # print(filtered_list)
             # print(len(filtered_list))
-            tbody_str = '&'.join(filtered_list)
-            sheet_check.cell(row=i,column=4).value = tbody_str
+            # tbody_str = '&'.join(filtered_list)
+            # sheet_check.cell(row=i,column=4).value = tbody_str
+            sheet_check.cell(row=i,column=4).value = string
             # print('---------------------------------------------------------------------------')
 
         if tbody_str in article_str:
@@ -79,7 +81,7 @@ for idx, obj in enumerate(provinces):
         else:
             sheet_check.cell(row=i,column=3).value = 'NO'
     
-    spreadsheet_check.save(f'C:\\Users\\phams\\Downloads\\du an\\du lieu goc\\{capitalized_name}\\{obj}_check_data.xlsx')
+    spreadsheet_check.save(f'C:\\Users\\phams\\Downloads\\du an\\du lieu goc\\{capitalized_name}\\{obj}_check_data_unfiltered.xlsx')
     
     print(f'Finished checking data for {obj}')
     

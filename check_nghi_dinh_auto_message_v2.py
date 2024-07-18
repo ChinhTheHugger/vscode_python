@@ -3,14 +3,12 @@ from playwright.async_api import async_playwright
 import json
 from datetime import datetime, date, timedelta, timezone
 import time
-import datetime as dt
 import logging
 import signal
-import sys
 
 # Configure logging
 logging.basicConfig(
-    filename="C:\\Users\\Public\\Downloads\\decrees_log.txt",  # Replace with your log file path
+    filename="LOG_nghi_dinh.txt",  # Replace with your log file path
     level=logging.INFO,  # You can set this to DEBUG, INFO, WARNING, ERROR, CRITICAL
     format='%(asctime)s - %(levelname)s - %(message)s',
 )
@@ -47,11 +45,6 @@ if __name__ == "__main__":
 
             async def get_accessibility_tree():
                 async with async_playwright() as p:
-                    # # --- Start new Firefox instance
-                    # # --- user_data_dir points to the Firefox user profile with log in info for GHTK internal chat system
-                    # # --- To avoid conflicting with any running Firefox instance, use a different user profile containing the same log in info
-                    # browser = await p.firefox.launch_persistent_context(user_data_dir="C:\\Users\\phams\\AppData\\Local\\Mozilla\\Firefox\\Profiles\\bd5r7ma0.default-release - Copy", headless=True)
-                    
                     # --- Start new Chrome instance
                     browser = await p.chromium.launch(headless=True)
                     
@@ -62,8 +55,11 @@ if __name__ == "__main__":
                     # --- Get the accessibility tree (JSON file)
                     accessibility_snapshot = await page.accessibility.snapshot()
                     
+                    # --- Close the browser
+                    await browser.close()
+                    
                     # --- Save the extracted JSON file to disk (Windows)
-                    json_path = 'C:\\Users\\Public\\Downloads\\nghi_dinh.json'
+                    json_path = 'nghi_dinh.json'
                     
                     with open(json_path, 'w') as f:
                         json.dump(accessibility_snapshot, f, indent=2)
@@ -80,17 +76,20 @@ if __name__ == "__main__":
                     new_decrees = []
                     count = 0
 
+                    # --- Check for the "children" node in the JSON file, which contains info about decrees
                     if len(data['children']) != 0:
-                        decrees = data['children'][-2]['children']
-                        total = int(len(decrees) / 4)
+                        decrees = data['children']
+                        total = int((len(decrees) - 20) / 4)
                         
                         for i in range(total):
-                            if datetime.strptime(decrees[1 + (4 * i)]['name'], "%d/%m/%Y").date() >= datetime.strptime(formatted_today, "%d/%m/%Y").date() and (decrees[0 + (4 * i)]['name'],formatted_today) not in checkpoint:
+                            # --- Check for new decree(s) based on current date and see if that decree(s) has been checked or not,
+                            # --- to prevent duplicating within the same day
+                            if datetime.strptime(decrees[17 + (4 * i)]['name'], "%d/%m/%Y").date() >= datetime.strptime(formatted_today, "%d/%m/%Y").date() and (decrees[16 + (4 * i)]['name'],formatted_today) not in checkpoint:
                                 new = {
-                                    'nghi_dinh_so': decrees[0 + (4 * i)]['name'],
-                                    'ngay_ban_hanh': decrees[1 + (4 * i)]['name'],
-                                    'ngay_hieu_luc': decrees[2 + (4 * i)]['name'],
-                                    'noi_dung': decrees[3 + (4 * i)]['name']
+                                    'nghi_dinh_so': decrees[16 + (4 * i)]['name'],
+                                    'ngay_ban_hanh': decrees[17 + (4 * i)]['name'],
+                                    'ngay_hieu_luc': decrees[18 + (4 * i)]['name'],
+                                    'noi_dung': decrees[19 + (4 * i)]['name']
                                 }
                                 new_decrees.append(new)
                                 checkpoint.append((decrees[0 + (4 * i)]['name'],formatted_today))
@@ -98,7 +97,7 @@ if __name__ == "__main__":
 
                     message = f'Automated message: Ngày {formatted_today} có {count} nghị định mới'
 
-                    # --- Prepare to log the result for new decree(s) and send the result to the desired GHTK group chat
+                    # --- Prepare to log the result for new decree(s)
                     if count > 0:
                         new_decrees_info = []
                         
@@ -112,48 +111,21 @@ if __name__ == "__main__":
 
                         message = message + new_decrees_info_merge + ''
                         
-                        # # --- Navigate to the desired GHTK group chat using URL
-                        # await page.goto('https://GHTK/channel/link/here')
-                        
-                        # # --- Wait for the chat box to load
-                        # await page.wait_for_selector('div[contenteditable="true"]')
-                        
-                        # # --- Find the chat box and type a message
-                        # chat_box = await page.query_selector('div[contenteditable="true"]')
-                        # for char in message:
-                        #     await chat_box.type(char, delay=50)
-                        
-                        # # --- Press Enter to send the message
-                        # async def click_send_button():
-                        #     await page.wait_for_selector('[class="footer-view__rep"]', timeout=20000)
-                        #     send_button = await page.query_selector('[class="footer-view__rep"]')
-                        #     if send_button:
-                        #         await send_button.click()
-                        #         return True
-                        #     else:
-                        #         return False
-                                
-                        # while not await click_send_button():
-                        #     await asyncio.sleep(2)
-
-                        # --- Log the result for new decree(s)
                         logging.info(message)
                     else:
                         # --- Log the result for no new decree
-                        logging.info(f'{dt.datetime.now()}: No new decree')
-                    
-                    await browser.close()
+                        logging.info(f': No new decree')
 
             # --- Run the process
             
-            logging.info(f'{dt.datetime.now()}: Starting browser to check for new decrees...')
+            logging.info(f': Starting browser to check for new decrees...')
             
             asyncio.get_event_loop().run_until_complete(get_accessibility_tree())
             
             # --- Set the process to sleep for a set amount of time
             interval = 20 # seconds
             
-            logging.info(f'{dt.datetime.now()}: Going into sleep mode for {interval / 60} hours...')
+            logging.info(f': Going into sleep mode for {interval / 3600} hours...')
             
             time.sleep(interval)
             
