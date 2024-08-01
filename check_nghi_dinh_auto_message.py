@@ -47,13 +47,13 @@ if __name__ == "__main__":
 
             async def get_accessibility_tree():
                 async with async_playwright() as p:
-                    # # --- Start new Firefox instance
-                    # # --- user_data_dir points to the Firefox user profile with log in info for GHTK internal chat system
-                    # # --- To avoid conflicting with any running Firefox instance, use a different user profile containing the same log in info
-                    # browser = await p.firefox.launch_persistent_context(user_data_dir="C:\\Users\\phams\\AppData\\Local\\Mozilla\\Firefox\\Profiles\\bd5r7ma0.default-release - Copy", headless=True)
+                    # --- Start new Firefox instance
+                    # --- user_data_dir points to the Firefox user profile with log in info for GHTK internal chat system
+                    # --- To avoid conflicting with any running Firefox instance, use a different user profile containing the same log in info
+                    browser = await p.firefox.launch_persistent_context(user_data_dir="C:\\Users\\phams\\AppData\\Local\\Mozilla\\Firefox\\Profiles\\bd5r7ma0.default-release - Copy", headless=False)
                     
-                    # --- Start new Chrome instance
-                    browser = await p.chromium.launch(headless=True)
+                    # # --- Start new Chrome instance
+                    # browser = await p.chromium.launch(headless=True)
                     
                     page = await browser.new_page()
                     
@@ -112,29 +112,29 @@ if __name__ == "__main__":
 
                         message = message + new_decrees_info_merge + ''
                         
-                        # # --- Navigate to the desired GHTK group chat using URL
-                        # await page.goto('https://GHTK/channel/link/here')
+                        # --- Navigate to the desired GHTK group chat using URL
+                        await page.goto('https://GHTK/channel/link/here')
                         
-                        # # --- Wait for the chat box to load
-                        # await page.wait_for_selector('div[contenteditable="true"]')
+                        # --- Wait for the chat box to load
+                        await page.wait_for_selector('div[contenteditable="true"]')
                         
-                        # # --- Find the chat box and type a message
-                        # chat_box = await page.query_selector('div[contenteditable="true"]')
-                        # for char in message:
-                        #     await chat_box.type(char, delay=50)
+                        # --- Find the chat box and type a message
+                        chat_box = await page.query_selector('div[contenteditable="true"]')
+                        for char in message:
+                            await chat_box.type(char, delay=50)
                         
-                        # # --- Press Enter to send the message
-                        # async def click_send_button():
-                        #     await page.wait_for_selector('[class="footer-view__rep"]', timeout=20000)
-                        #     send_button = await page.query_selector('[class="footer-view__rep"]')
-                        #     if send_button:
-                        #         await send_button.click()
-                        #         return True
-                        #     else:
-                        #         return False
+                        # --- Press Enter to send the message
+                        async def click_send_button():
+                            await page.wait_for_selector('[class="footer-view__rep"]', timeout=20000)
+                            send_button = await page.query_selector('[class="footer-view__rep"]')
+                            if send_button:
+                                await send_button.click()
+                                return True
+                            else:
+                                return False
                                 
-                        # while not await click_send_button():
-                        #     await asyncio.sleep(2)
+                        while not await click_send_button():
+                            await asyncio.sleep(2)
 
                         # --- Log the result for new decree(s)
                         logging.info(message)
@@ -151,9 +151,9 @@ if __name__ == "__main__":
             asyncio.get_event_loop().run_until_complete(get_accessibility_tree())
             
             # --- Set the process to sleep for a set amount of time
-            interval = 20 # seconds
+            interval = 15 # seconds
             
-            logging.info(f'{dt.datetime.now()}: Going into sleep mode for {interval / 60} hours...')
+            logging.info(f'{dt.datetime.now()}: Going into sleep mode for {interval / 60} minute(s)...')
             
             time.sleep(interval)
             
